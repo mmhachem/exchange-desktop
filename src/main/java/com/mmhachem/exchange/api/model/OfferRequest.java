@@ -17,4 +17,10 @@ public class OfferRequest {
 
     @SerializedName("created_at")
     public String createdAt;
+
+    @SerializedName("requester_name")
+    public String requesterName; // 👈 Add this
+
+
+
 }

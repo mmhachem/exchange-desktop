@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox spacing="15" alignment="CENTER" xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.mmhachem.exchange.balance.Balance">
+
+    <Label text="Update Your Balance" style="-fx-font-size: 18px;" />
+
+    <HBox spacing="10" alignment="CENTER">
+        <Label text="USD Balance:" />
+        <TextField fx:id="usdField" prefWidth="100"/>
+        <Button text="Submit USD" onAction="#submitUsdBalance"/>
+    </HBox>
+
+    <HBox spacing="10" alignment="CENTER">
+        <Label text="LBP Balance:" />
+        <TextField fx:id="lbpField" prefWidth="100"/>
+        <Button text="Submit LBP" onAction="#submitLbpBalance"/>
+    </HBox>
+
+    <Label fx:id="statusLabel" style="-fx-text-fill: green;" />
+</VBox>

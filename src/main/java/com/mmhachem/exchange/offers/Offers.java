@@ -60,6 +60,8 @@ public class Offers implements Initializable {
     @FXML private TableColumn<OfferRequest, Integer> requestIdColumn;
     @FXML private TableColumn<OfferRequest, String> requestStatusColumn;
     @FXML private TableColumn<OfferRequest, Void> requestActionColumn;
+    @FXML private TableColumn<OfferRequest, String> requesterNameColumn;
+
 
 
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
@@ -68,6 +70,9 @@ public class Offers implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         // Initialize table columns
+        requesterNameColumn.setCellValueFactory(data ->
+                new SimpleStringProperty(data.getValue().requesterName));
+
         idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
         typeColumn.setCellValueFactory(cellData ->
                 new SimpleStringProperty(cellData.getValue().offerType.equals("buy") ? "Buy USD" : "Sell USD"));
@@ -153,11 +158,19 @@ public class Offers implements Initializable {
             @Override
             public void onResponse(Call<List<OfferRequest>> call, Response<List<OfferRequest>> response) {
                 if (response.isSuccessful() && response.body() != null) {
+                    List<OfferRequest> requests = response.body();
+
+                    // For each request, assign a name from the cache or placeholder
+                    for (OfferRequest r : requests) {
+                        fetchRequesterName(r.requesterId, r);
+                    }
+
                     javafx.application.Platform.runLater(() -> {
-                        requestsTable.getItems().setAll(response.body());
+                        requestsTable.getItems().setAll(requests);
                     });
                 }
             }
+
 
             @Override
             public void onFailure(Call<List<OfferRequest>> call, Throwable t) {
@@ -334,6 +347,25 @@ public class Offers implements Initializable {
         alert.setContentText(message);
         alert.showAndWait();
     }
+
+    private final java.util.Map<Integer, String> requesterCache = new java.util.HashMap<>();
+
+    private void fetchRequesterName(int requesterId, OfferRequest request) {
+        // Check if we already fetched this user's name
+        if (requesterCache.containsKey(requesterId)) {
+            request.requesterName = requesterCache.get(requesterId);
+            requestsTable.refresh();
+            return;
+        }
+
+        // Since we cannot call the backend for another user's profile directly,
+        // we fallback to a placeholder name
+        String name = "User #" + requesterId;
+        requesterCache.put(requesterId, name);
+        request.requesterName = name;
+        requestsTable.refresh();
+    }
+
 
 
 

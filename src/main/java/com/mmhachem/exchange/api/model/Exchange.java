@@ -104,5 +104,8 @@ public interface Exchange {
     Call<RatePrediction> predictRate();
 
 
+
+
+
 }
 

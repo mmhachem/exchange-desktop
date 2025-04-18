@@ -69,6 +69,8 @@
                         <TableColumn fx:id="requestIdColumn" text="Request ID" />
                         <TableColumn fx:id="requestStatusColumn" text="Status" />
                         <TableColumn fx:id="requestActionColumn" text="Action" />
+                        <TableColumn fx:id="requesterNameColumn" text="Requester" />
+
                     </columns>
                 </TableView>
             </VBox>

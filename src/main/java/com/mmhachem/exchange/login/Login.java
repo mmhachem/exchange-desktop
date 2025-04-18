@@ -12,6 +12,10 @@ import javafx.scene.control.TextField;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+import com.google.gson.JsonParser;
+
+import java.util.Base64;
+
 
 public class Login implements PageCompleter {
     public TextField usernameTextField;
@@ -38,7 +42,20 @@ public class Login implements PageCompleter {
             @Override
             public void onResponse(Call<Token> call, Response<Token> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    Authentication.getInstance().saveToken(response.body().getToken());
+                    String token = response.body().getToken();
+                    Authentication.getInstance().saveToken(token);
+
+
+                    try {
+                        String[] parts = token.split("\\.");
+                        String payload = new String(Base64.getDecoder().decode(parts[1]));
+                        com.google.gson.JsonObject json = new JsonParser().parse(payload).getAsJsonObject();
+
+                        int id = json.get("sub").getAsInt();
+                        Authentication.getInstance().saveUserId(id); // ✅ Save to Authentication
+                    } catch (Exception e) {
+                        System.err.println("Failed to parse token: " + e.getMessage());
+                    }
 
                     Platform.runLater(() -> {
                         onPageCompleteListener.onPageCompleted();
@@ -54,6 +71,8 @@ public class Login implements PageCompleter {
             }
         });
     }
+
 }
+
 
 
