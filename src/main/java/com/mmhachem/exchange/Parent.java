@@ -20,6 +20,8 @@ public class Parent implements Initializable, OnPageCompleteListener {
     public Button statisticsButton;
     public Button offersButton;
     public Button profileButton;
+    public Button notificationsButton;
+
 
 
     @Override
@@ -60,6 +62,10 @@ public class Parent implements Initializable, OnPageCompleteListener {
     public void profileSelected() {
         swapContent(Section.PROFILE);
     }
+    public void notificationsSelected() {
+        swapContent(Section.NOTIFICATIONS);
+    }
+
 
     public void swapContent(Section section) {
         try {
@@ -93,6 +99,9 @@ public class Parent implements Initializable, OnPageCompleteListener {
         offersButton.setVisible(authenticated);
         profileButton.setManaged(authenticated);
         profileButton.setVisible(authenticated);
+        notificationsButton.setManaged(authenticated);
+        notificationsButton.setVisible(authenticated);
+
 
 
     }
@@ -111,7 +120,8 @@ public class Parent implements Initializable, OnPageCompleteListener {
         OFFERS,
         PROFILE,
         LOGIN,
-        REGISTER;
+        REGISTER,
+        NOTIFICATIONS;
 
         public String getResource() {
             return switch (this) {
@@ -122,6 +132,8 @@ public class Parent implements Initializable, OnPageCompleteListener {
                 case PROFILE -> "/com/mmhachem/exchange/profile/profile.fxml";
                 case LOGIN -> "/com/mmhachem/exchange/login/login.fxml";
                 case REGISTER -> "/com/mmhachem/exchange/register/register.fxml";
+                case NOTIFICATIONS -> "/com/mmhachem/exchange/notifications/notifications.fxml";
+
 
             };
         }

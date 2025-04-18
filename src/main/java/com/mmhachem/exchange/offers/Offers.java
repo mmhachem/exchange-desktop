@@ -8,6 +8,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.HBox;
 import javafx.util.Callback;
 import retrofit2.Call;
 import retrofit2.Response;
@@ -48,14 +49,18 @@ public class Offers implements Initializable {
     @FXML
     private Label createOfferStatus;
 
-    @FXML
-    private TableView<Notification> notificationsTable;
-    @FXML
-    private TableColumn<Notification, String> notifTypeColumn;
-    @FXML
-    private TableColumn<Notification, String> notifMessageColumn;
-    @FXML
-    private TableColumn<Notification, String> notifTimestampColumn;
+
+    @FXML private TableView<ExchangeOffer> myOffersTable;
+    @FXML private TableColumn<ExchangeOffer, Integer> myOfferIdColumn;
+    @FXML private TableColumn<ExchangeOffer, String> myOfferTypeColumn;
+    @FXML private TableColumn<ExchangeOffer, Float> myOfferAmountColumn;
+    @FXML private TableColumn<ExchangeOffer, Float> myOfferRateColumn;
+
+    @FXML private TableView<OfferRequest> requestsTable;
+    @FXML private TableColumn<OfferRequest, Integer> requestIdColumn;
+    @FXML private TableColumn<OfferRequest, String> requestStatusColumn;
+    @FXML private TableColumn<OfferRequest, Void> requestActionColumn;
+
 
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
     private final SimpleDateFormat readableFormat = new SimpleDateFormat("MMM dd, yyyy HH:mm");
@@ -71,23 +76,14 @@ public class Offers implements Initializable {
         lbpEquivalentColumn.setCellValueFactory(cellData -> {
             ExchangeOffer offer = cellData.getValue();
             return new SimpleStringProperty(String.format("%,.0f", offer.usdAmount * offer.rate));
+
         });
 
         // Setup action column
         setupActionColumn();
 
-        // Setup notifications table
-        notifTypeColumn.setCellValueFactory(cellData ->
-                new SimpleStringProperty(cellData.getValue().type));
-        notifMessageColumn.setCellValueFactory(new PropertyValueFactory<>("message"));
-        notifTimestampColumn.setCellValueFactory(cellData -> {
-            try {
-                Date date = dateFormat.parse(cellData.getValue().timestamp);
-                return new SimpleStringProperty(readableFormat.format(date));
-            } catch (ParseException e) {
-                return new SimpleStringProperty(cellData.getValue().timestamp);
-            }
-        });
+        // Setup com.mmhachem.exchange.notifications table
+
 
         // Add listeners to calculate LBP amount
         ChangeListener<Object> updateLbpAmount = (observable, oldValue, newValue) -> calculateLbpAmount();
@@ -96,7 +92,23 @@ public class Offers implements Initializable {
 
         // Initial fetch
         refreshOffers();
-        refreshNotifications();
+        refreshMyOffers();
+
+        myOfferIdColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
+        myOfferTypeColumn.setCellValueFactory(cellData ->
+                new SimpleStringProperty(cellData.getValue().offerType.equals("buy") ? "Buy" : "Sell"));
+        myOfferAmountColumn.setCellValueFactory(new PropertyValueFactory<>("usdAmount"));
+        myOfferRateColumn.setCellValueFactory(new PropertyValueFactory<>("rate"));
+        myOffersTable.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal != null) {
+                loadRequestsForOffer(newVal.id);
+            }
+        });
+
+        requestIdColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
+        requestStatusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
+        setupRequestActionColumn();
+
     }
 
     private void calculateLbpAmount() {
@@ -109,6 +121,102 @@ public class Offers implements Initializable {
             lbpAmountLabel.setText("0");
         }
     }
+
+    @FXML
+    private void refreshMyOffers() {
+        String token = Authentication.getInstance().getToken();
+        if (token == null) return;
+
+        ExchangeService.exchangeApi().getOffers().enqueue(new retrofit2.Callback<>() {
+            @Override
+            public void onResponse(Call<List<ExchangeOffer>> call, Response<List<ExchangeOffer>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    List<ExchangeOffer> all = response.body();
+                    int myId = Authentication.getInstance().getUserId(); // implement getUserId() if needed
+                    List<ExchangeOffer> mine = all.stream().filter(o -> o.userId != null && o.userId.equals(myId)).toList();
+                    javafx.application.Platform.runLater(() -> {
+                        myOffersTable.getItems().setAll(mine);
+                    });
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<ExchangeOffer>> call, Throwable t) {
+                System.err.println("Failed to load my offers: " + t.getMessage());
+            }
+        });
+    }
+
+    private void loadRequestsForOffer(int offerId) {
+        String token = Authentication.getInstance().getToken();
+        ExchangeService.exchangeApi().getOfferRequests(offerId, "Bearer " + token).enqueue(new retrofit2.Callback<>() {
+            @Override
+            public void onResponse(Call<List<OfferRequest>> call, Response<List<OfferRequest>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    javafx.application.Platform.runLater(() -> {
+                        requestsTable.getItems().setAll(response.body());
+                    });
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<OfferRequest>> call, Throwable t) {
+                System.err.println("Failed to load requests: " + t.getMessage());
+            }
+        });
+    }
+
+    private void setupRequestActionColumn() {
+        requestActionColumn.setCellFactory(param -> new TableCell<>() {
+            private final Button acceptBtn = new Button("Accept");
+            private final Button rejectBtn = new Button("Reject");
+            private final HBox box = new HBox(5, acceptBtn, rejectBtn);
+
+            {
+                acceptBtn.setOnAction(e -> {
+                    OfferRequest req = getTableView().getItems().get(getIndex());
+                    handleRequestAction(req.id, true);
+                });
+                rejectBtn.setOnAction(e -> {
+                    OfferRequest req = getTableView().getItems().get(getIndex());
+                    handleRequestAction(req.id, false);
+                });
+            }
+
+            @Override
+            protected void updateItem(Void item, boolean empty) {
+                super.updateItem(item, empty);
+                setGraphic(empty ? null : box);
+            }
+        });
+    }
+
+    private void handleRequestAction(int requestId, boolean approve) {
+        String token = Authentication.getInstance().getToken();
+        Call<Object> call = approve
+                ? ExchangeService.exchangeApi().approveRequest(requestId, "Bearer " + token)
+                : ExchangeService.exchangeApi().rejectRequest(requestId, "Bearer " + token);
+
+        call.enqueue(new retrofit2.Callback<>() {
+            @Override
+            public void onResponse(Call<Object> call, Response<Object> response) {
+                if (response.isSuccessful()) {
+                    javafx.application.Platform.runLater(() -> {
+                        refreshMyOffers(); // refresh UI
+                        requestsTable.getItems().clear();
+                    });
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Object> call, Throwable t) {
+                System.err.println("Failed to update request: " + t.getMessage());
+            }
+        });
+    }
+
+
+
 
     @FXML
     private void refreshOffers() {
@@ -168,7 +276,6 @@ public class Offers implements Initializable {
                 if (response.isSuccessful()) {
                     javafx.application.Platform.runLater(() -> {
                         createOfferStatus.setText("Offer requested successfully!");
-                        refreshNotifications();
                     });
                 } else {
                     javafx.application.Platform.runLater(() -> createOfferStatus.setText("Request failed."));
@@ -216,23 +323,5 @@ public class Offers implements Initializable {
         }
     }
 
-    @FXML
-    private void refreshNotifications() {
-        String token = Authentication.getInstance().getToken();
-        if (token == null) return;
 
-        ExchangeService.exchangeApi().getNotifications("Bearer " + token).enqueue(new retrofit2.Callback<List<Notification>>() {
-            @Override
-            public void onResponse(Call<List<Notification>> call, Response<List<Notification>> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    javafx.application.Platform.runLater(() -> notificationsTable.getItems().setAll(response.body()));
-                }
-            }
-
-            @Override
-            public void onFailure(Call<List<Notification>> call, Throwable t) {
-                System.err.println("Failed to load notifications: " + t.getMessage());
-            }
-        });
-    }
 }

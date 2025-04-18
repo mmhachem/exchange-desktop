@@ -25,6 +25,8 @@
             <Button fx:id="loginButton" styleClass="nav-button" text="Login" onAction="#loginSelected"/>
             <Button fx:id="registerButton" styleClass="nav-button" text="Register" onAction="#registerSelected"/>
             <Button fx:id="logoutButton" styleClass="nav-button" text="Log out" onAction="#logoutSelected"/>
+            <Button fx:id="notificationsButton" styleClass="nav-button" text="Notifications" onAction="#notificationsSelected"/>
+
         </VBox>
 
     </left>

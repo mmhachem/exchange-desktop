@@ -11,8 +11,11 @@ module com.mmhachem.exchange {
     opens com.mmhachem.exchange to javafx.fxml;
     opens com.mmhachem.exchange.api.model to javafx.base, gson;
     opens com.mmhachem.exchange.transactions to javafx.fxml;
+    opens com.mmhachem.exchange.notifications to javafx.fxml;
+
 
     exports com.mmhachem.exchange;
+    exports com.mmhachem.exchange.notifications;
     exports rates;
     opens rates to javafx.fxml;
     exports com.mmhachem.exchange.login;

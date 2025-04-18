@@ -53,18 +53,27 @@
                 <Label fx:id="createOfferStatus" />
             </VBox>
         </Tab>
-        <Tab text="My Requests">
+        <Tab text="My Offers">
             <VBox spacing="10">
-                <TableView fx:id="notificationsTable" VBox.vgrow="ALWAYS">
+                <TableView fx:id="myOffersTable" VBox.vgrow="ALWAYS">
                     <columns>
-                        <TableColumn fx:id="notifTypeColumn" text="Type" />
-                        <TableColumn fx:id="notifMessageColumn" text="Message" />
-                        <TableColumn fx:id="notifTimestampColumn" text="Time" />
+                        <TableColumn fx:id="myOfferIdColumn" text="ID" />
+                        <TableColumn fx:id="myOfferTypeColumn" text="Type" />
+                        <TableColumn fx:id="myOfferAmountColumn" text="USD" />
+                        <TableColumn fx:id="myOfferRateColumn" text="Rate" />
                     </columns>
                 </TableView>
-                <Button text="Refresh" onAction="#refreshNotifications" />
+                <Label text="Requests for Selected Offer:" />
+                <TableView fx:id="requestsTable" VBox.vgrow="ALWAYS">
+                    <columns>
+                        <TableColumn fx:id="requestIdColumn" text="Request ID" />
+                        <TableColumn fx:id="requestStatusColumn" text="Status" />
+                        <TableColumn fx:id="requestActionColumn" text="Action" />
+                    </columns>
+                </TableView>
             </VBox>
         </Tab>
+
     </TabPane>
 
     <fx:define>

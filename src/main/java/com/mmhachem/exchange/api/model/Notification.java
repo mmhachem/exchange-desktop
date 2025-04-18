@@ -17,4 +17,25 @@ public class Notification {
 
     @SerializedName("status")
     public String status;
+
+    public String getType() {
+        return type;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public String getTimestamp() {
+        return timestamp;
+    }
+
+    public Integer getOfferId() {
+        return offerId;
+    }
+
+    public String getStatus() {
+        return status;
+    }
 }
+

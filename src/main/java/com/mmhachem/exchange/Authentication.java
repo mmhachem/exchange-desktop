@@ -1,4 +1,8 @@
 package com.mmhachem.exchange;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
+import java.util.Base64;
 import java.util.prefs.Preferences;
 
 public class Authentication {
@@ -6,6 +10,7 @@ public class Authentication {
     private static final String TOKEN_KEY = "TOKEN";
 
     private static String token;
+    private static int userId;
     private Preferences pref;
 
     private Authentication() {
@@ -32,5 +37,12 @@ public class Authentication {
     public void deleteToken() {
         this.token = null;
         pref.remove(TOKEN_KEY);
+    }
+    public void saveUserId(int id) {
+        Authentication.userId = id;
+    }
+
+    public int getUserId() {
+        return userId;
     }
 }

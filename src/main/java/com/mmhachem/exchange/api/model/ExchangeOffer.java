@@ -26,4 +26,28 @@ public class ExchangeOffer {
         this.usdAmount = usdAmount;
         this.rate = rate;
     }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public Integer getUserId() {
+        return userId;
+    }
+
+    public String getOfferType() {
+        return offerType;
+    }
+
+    public Float getUsdAmount() {
+        return usdAmount;
+    }
+
+    public Float getRate() {
+        return rate;
+    }
+
+    public String getStatus() {
+        return status;
+    }
 }
