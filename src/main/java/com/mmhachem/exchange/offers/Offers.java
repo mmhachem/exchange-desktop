@@ -315,27 +315,75 @@ public class Offers implements Initializable {
         String token = Authentication.getInstance().getToken();
         if (token == null) return;
 
-        ExchangeService.exchangeApi().requestOffer(offerId, "Bearer " + token)
-                .enqueue(new retrofit2.Callback<>() {
-                    @Override
-                    public void onResponse(Call<OfferRequest> call, Response<OfferRequest> response) {
-                        javafx.application.Platform.runLater(() -> {
-                            if (response.isSuccessful()) {
-                                showAlert(Alert.AlertType.INFORMATION, "Request Sent", "Offer requested successfully!");
-                                refreshMyOffers(); // optional
-                            } else {
-                                showAlert(Alert.AlertType.ERROR, "Request Failed", "You already requested this offer or it's not available.");
-                            }
-                        });
+        // 🔁 First fetch the offer details to determine type and amount
+        ExchangeOffer selectedOffer = offersTable.getItems().stream()
+                .filter(o -> o.id == offerId)
+                .findFirst()
+                .orElse(null);
+
+        if (selectedOffer == null) {
+            showAlert(Alert.AlertType.ERROR, "Error", "Offer not found.");
+            return;
+        }
+
+        // 🔁 Now fetch balance
+        ExchangeService.exchangeApi().getBalance("Bearer " + token).enqueue(new retrofit2.Callback<>() {
+            @Override
+            public void onResponse(Call<UserBalance> call, Response<UserBalance> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    UserBalance balance = response.body();
+                    float usd = selectedOffer.usdAmount;
+                    float lbp = selectedOffer.usdAmount * selectedOffer.rate;
+
+                    boolean hasEnough = selectedOffer.offerType.equals("sell")
+                            ? balance.lbpBalance != null && balance.lbpBalance >= lbp
+                            : balance.usdBalance != null && balance.usdBalance >= usd;
+
+                    if (!hasEnough) {
+                        javafx.application.Platform.runLater(() ->
+                                showAlert(Alert.AlertType.WARNING, "Insufficient Balance",
+                                        selectedOffer.offerType.equals("sell")
+                                                ? "You need at least " + (int) lbp + " LBP to request this offer."
+                                                : "You need at least " + usd + " USD to request this offer.")
+                        );
+                        return;
                     }
 
-                    @Override
-                    public void onFailure(Call<OfferRequest> call, Throwable t) {
-                        javafx.application.Platform.runLater(() ->
-                                showAlert(Alert.AlertType.ERROR, "Request Failed", "Error sending request: " + t.getMessage())
-                        );
-                    }
-                });
+                    // ✅ Now proceed to send the request
+                    ExchangeService.exchangeApi().requestOffer(offerId, "Bearer " + token)
+                            .enqueue(new retrofit2.Callback<>() {
+                                @Override
+                                public void onResponse(Call<OfferRequest> call, Response<OfferRequest> response) {
+                                    javafx.application.Platform.runLater(() -> {
+                                        if (response.isSuccessful()) {
+                                            showAlert(Alert.AlertType.INFORMATION, "Request Sent", "Offer requested successfully!");
+                                            refreshMyOffers(); // optional
+                                        } else {
+                                            showAlert(Alert.AlertType.ERROR, "Request Failed", "You already requested this offer or it's not available.");
+                                        }
+                                    });
+                                }
+
+                                @Override
+                                public void onFailure(Call<OfferRequest> call, Throwable t) {
+                                    javafx.application.Platform.runLater(() ->
+                                            showAlert(Alert.AlertType.ERROR, "Request Failed", "Error sending request: " + t.getMessage())
+                                    );
+                                }
+                            });
+
+                } else {
+                    showAlert(Alert.AlertType.ERROR, "Balance Fetch Error", "Could not fetch your balance.");
+                }
+            }
+
+            @Override
+            public void onFailure(Call<UserBalance> call, Throwable t) {
+                javafx.application.Platform.runLater(() ->
+                        showAlert(Alert.AlertType.ERROR, "Balance Error", "Failed to check balance: " + t.getMessage())
+                );
+            }
+        });
     }
 
 
