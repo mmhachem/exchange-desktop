@@ -31,7 +31,6 @@ public class Rates {
     @FXML
     public ToggleGroup transactionType;
 
-
     @FXML
     private TextField amountField;
     @FXML
@@ -45,7 +44,6 @@ public class Rates {
         usdTextField.setOnKeyTyped(event -> setClipboard(null));
         lbpTextField.setOnKeyTyped(event -> setClipboard(null));
         directionBox.getItems().addAll("USD to LBP", "LBP to USD");
-
     }
 
     private void setClipboard(String value) {
@@ -71,13 +69,13 @@ public class Rates {
                     });
 
                 } else {
-                    System.err.println("Failed to fetch rates. HTTP Status: " + response.code());
+                    showAlert(Alert.AlertType.ERROR, "Rate Error", "Failed to fetch exchange rates.");
                 }
             }
 
             @Override
             public void onFailure(Call<ExchangeRates> call, Throwable throwable) {
-                System.err.println("Network error: " + throwable.getMessage());
+                showAlert(Alert.AlertType.ERROR, "Connection Error", "Failed to connect: " + throwable.getMessage());
             }
         });
     }
@@ -88,7 +86,7 @@ public class Rates {
             String lbpInput = lbpTextField.getText().trim();
 
             if (!usdInput.matches("^\\d+(\\.\\d{1,2})?$") || !lbpInput.matches("^\\d+(\\.\\d{1,2})?$")) {
-                throw new IllegalArgumentException("Invalid currency values");
+                throw new IllegalArgumentException("Invalid currency values.");
             }
 
             float usdAmount = Float.parseFloat(usdInput);
@@ -110,7 +108,7 @@ public class Rates {
             String userToken = Authentication.getInstance().getToken();
             String authHeader = userToken != null ? "Bearer " + userToken : null;
 
-            ExchangeService.exchangeApi().addTransaction(transaction, authHeader).enqueue(new Callback<Object>() {
+            ExchangeService.exchangeApi().addTransaction(transaction, authHeader).enqueue(new Callback<>() {
                 @Override
                 public void onResponse(Call<Object> call, Response<Object> response) {
                     fetchRates();
@@ -127,12 +125,12 @@ public class Rates {
 
                 @Override
                 public void onFailure(Call<Object> call, Throwable throwable) {
-                    System.err.println("Transaction failed: " + throwable.getMessage());
+                    showAlert(Alert.AlertType.ERROR, "Transaction Failed", throwable.getMessage());
                 }
             });
 
         } catch (IllegalArgumentException e) {
-            System.err.println("Input error: " + e.getMessage());
+            showAlert(Alert.AlertType.WARNING, "Input Error", e.getMessage());
         }
     }
 
@@ -142,7 +140,7 @@ public class Rates {
         String direction = directionBox.getValue();
 
         if (amountText.isEmpty() || direction == null) {
-            resultLabel.setText("Please enter amount and select direction.");
+            showAlert(Alert.AlertType.WARNING, "Missing Input", "Please enter amount and select direction.");
             return;
         }
 
@@ -150,7 +148,7 @@ public class Rates {
             float amount = Float.parseFloat(amountText);
 
             if (amount <= 0) {
-                resultLabel.setText("Amount must be positive.");
+                showAlert(Alert.AlertType.WARNING, "Invalid Input", "Amount must be positive.");
                 return;
             }
 
@@ -163,12 +161,21 @@ public class Rates {
                 float result = amount / rate;
                 resultLabel.setText(String.format("%.2f LBP = %.2f USD", amount, result));
             } else {
-                resultLabel.setText("Please select a valid conversion direction.");
+                showAlert(Alert.AlertType.WARNING, "Invalid Direction", "Please select a valid conversion direction.");
             }
 
         } catch (NumberFormatException e) {
-            resultLabel.setText("Invalid number format.");
+            showAlert(Alert.AlertType.ERROR, "Format Error", "Invalid number format.");
         }
     }
 
+    private void showAlert(Alert.AlertType type, String title, String message) {
+        Platform.runLater(() -> {
+            Alert alert = new Alert(type);
+            alert.setTitle(title);
+            alert.setHeaderText(null);
+            alert.setContentText(message);
+            alert.showAndWait();
+        });
+    }
 }
