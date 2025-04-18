@@ -61,6 +61,8 @@
                         <TableColumn fx:id="myOfferTypeColumn" text="Type" />
                         <TableColumn fx:id="myOfferAmountColumn" text="USD" />
                         <TableColumn fx:id="myOfferRateColumn" text="Rate" />
+                        <TableColumn fx:id="myOfferStatusColumn" text="Status" />
+
                     </columns>
                 </TableView>
                 <Label text="Requests for Selected Offer:" />

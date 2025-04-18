@@ -61,6 +61,7 @@ public class Offers implements Initializable {
     @FXML private TableColumn<OfferRequest, String> requestStatusColumn;
     @FXML private TableColumn<OfferRequest, Void> requestActionColumn;
     @FXML private TableColumn<OfferRequest, String> requesterNameColumn;
+    @FXML private TableColumn<ExchangeOffer, String> myOfferStatusColumn;
 
 
 
@@ -99,6 +100,8 @@ public class Offers implements Initializable {
         refreshOffers();
         refreshMyOffers();
 
+
+
         myOfferIdColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
         myOfferTypeColumn.setCellValueFactory(cellData ->
                 new SimpleStringProperty(cellData.getValue().offerType.equals("buy") ? "Buy" : "Sell"));
@@ -109,6 +112,23 @@ public class Offers implements Initializable {
                 loadRequestsForOffer(newVal.id);
             }
         });
+        myOfferStatusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
+        myOffersTable.setRowFactory(tv -> new TableRow<>() {
+            @Override
+            protected void updateItem(ExchangeOffer offer, boolean empty) {
+                super.updateItem(offer, empty);
+                if (offer == null || empty) {
+                    setStyle("");
+                } else if ("completed".equals(offer.status)) {
+                    setStyle("-fx-background-color: #e0e0e0;");
+                } else {
+                    setStyle(""); // Reset style for others
+                }
+            }
+        });
+
+
+
 
         requestIdColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
         requestStatusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
@@ -213,20 +233,32 @@ public class Offers implements Initializable {
         call.enqueue(new retrofit2.Callback<>() {
             @Override
             public void onResponse(Call<Object> call, Response<Object> response) {
-                if (response.isSuccessful()) {
-                    javafx.application.Platform.runLater(() -> {
-                        refreshMyOffers(); // refresh UI
-                        requestsTable.getItems().clear();
-                    });
-                }
+                javafx.application.Platform.runLater(() -> {
+                    if (response.isSuccessful()) {
+                        showAlert(Alert.AlertType.INFORMATION,
+                                approve ? "Request Approved" : "Request Rejected",
+                                approve ? "The request has been approved and balances updated."
+                                        : "The request has been rejected.");
+                        refreshMyOffers();
+                        ExchangeOffer selected = myOffersTable.getSelectionModel().getSelectedItem();
+                        if (selected != null) {
+                            loadRequestsForOffer(selected.id);
+                        }
+                    } else {
+                        showAlert(Alert.AlertType.ERROR, "Action Failed",
+                                "Failed to process request. It may be already handled.");
+                    }
+                });
             }
 
             @Override
             public void onFailure(Call<Object> call, Throwable t) {
-                System.err.println("Failed to update request: " + t.getMessage());
+                javafx.application.Platform.runLater(() ->
+                        showAlert(Alert.AlertType.ERROR, "Network Error", "Could not reach the server."));
             }
         });
     }
+
 
 
 
@@ -313,32 +345,75 @@ public class Offers implements Initializable {
             String offerType = buyRadio.isSelected() ? "buy" : "sell";
             float usd = Float.parseFloat(usdAmountField.getText());
             float rate = Float.parseFloat(rateField.getText());
-
-            ExchangeOffer offer = new ExchangeOffer(offerType, usd, rate);
             String token = Authentication.getInstance().getToken();
 
-            ExchangeService.exchangeApi().createOffer(offer, "Bearer " + token).enqueue(new retrofit2.Callback<>() {
+            // ✅ Step 1: Get user balance
+            ExchangeService.exchangeApi().getBalance("Bearer " + token).enqueue(new retrofit2.Callback<>() {
                 @Override
-                public void onResponse(Call<ExchangeOffer> call, Response<ExchangeOffer> response) {
-                    if (response.isSuccessful()) {
-                        javafx.application.Platform.runLater(() -> {
-                            createOfferStatus.setText("Offer created!");
-                            refreshOffers();
-                        });
+                public void onResponse(Call<UserBalance> call, Response<UserBalance> response) {
+                    if (response.isSuccessful() && response.body() != null) {
+                        UserBalance balance = response.body();
+                        float requiredLBP = usd * rate;
+
+                        // ✅ Step 2: Check if the user has enough balance
+                        boolean hasEnough = (offerType.equals("sell") && balance.usdBalance >= usd)
+                                || (offerType.equals("buy") && balance.lbpBalance >= requiredLBP);
+
+                        if (!hasEnough) {
+                            javafx.application.Platform.runLater(() -> {
+                                showAlert(Alert.AlertType.ERROR, "Insufficient Balance",
+                                        offerType.equals("sell")
+                                                ? "You don't have enough USD to create this offer."
+                                                : "You don't have enough LBP to create this offer.");
+                            });
+                            return;
+                        }
+
+                        // ✅ Step 3: Proceed with offer creation
+                        ExchangeOffer offer = new ExchangeOffer(offerType, usd, rate);
+                        ExchangeService.exchangeApi().createOffer(offer, "Bearer " + token)
+                                .enqueue(new retrofit2.Callback<>() {
+                                    @Override
+                                    public void onResponse(Call<ExchangeOffer> call, Response<ExchangeOffer> offerResponse) {
+                                        javafx.application.Platform.runLater(() -> {
+                                            if (offerResponse.isSuccessful()) {
+                                                createOfferStatus.setText("Offer created!");
+                                                refreshOffers();
+                                                refreshMyOffers();
+                                            } else {
+                                                createOfferStatus.setText("Failed to create offer.");
+                                            }
+                                        });
+                                    }
+
+                                    @Override
+                                    public void onFailure(Call<ExchangeOffer> call, Throwable t) {
+                                        javafx.application.Platform.runLater(() ->
+                                                createOfferStatus.setText("Error: " + t.getMessage()));
+                                    }
+                                });
+
                     } else {
-                        javafx.application.Platform.runLater(() -> createOfferStatus.setText("Failed to create offer."));
+                        javafx.application.Platform.runLater(() ->
+                                showAlert(Alert.AlertType.ERROR, "Error", "Failed to check your balance."));
                     }
                 }
 
                 @Override
-                public void onFailure(Call<ExchangeOffer> call, Throwable t) {
-                    javafx.application.Platform.runLater(() -> createOfferStatus.setText("Error: " + t.getMessage()));
+                public void onFailure(Call<UserBalance> call, Throwable t) {
+                    javafx.application.Platform.runLater(() ->
+                            showAlert(Alert.AlertType.ERROR, "Network Error", "Could not fetch balance: " + t.getMessage()));
                 }
             });
+
         } catch (NumberFormatException e) {
             createOfferStatus.setText("Invalid input.");
         }
     }
+
+
+
+
 
     private void showAlert(Alert.AlertType type, String title, String message) {
         Alert alert = new Alert(type);

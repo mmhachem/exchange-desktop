@@ -19,7 +19,7 @@ public class OfferRequest {
     public String createdAt;
 
     @SerializedName("requester_name")
-    public String requesterName; // 👈 Add this
+    public String requesterName;
 
 
 
