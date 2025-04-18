@@ -21,6 +21,29 @@ public class OfferRequest {
     @SerializedName("requester_name")
     public String requesterName;
 
+    public Integer getId() {
+        return id;
+    }
 
+    public Integer getOfferId() {
+        return offerId;
+    }
 
+    public Integer getRequesterId() {
+        return requesterId;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public String getCreatedAt() {
+        return createdAt;
+    }
+
+    public String getRequesterName() {
+        return requesterName;
+    }
 }
+
+

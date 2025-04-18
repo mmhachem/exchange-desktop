@@ -13,6 +13,7 @@ import javafx.util.Callback;
 import retrofit2.Call;
 import retrofit2.Response;
 
+import java.io.IOException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -108,10 +109,13 @@ public class Offers implements Initializable {
         myOfferAmountColumn.setCellValueFactory(new PropertyValueFactory<>("usdAmount"));
         myOfferRateColumn.setCellValueFactory(new PropertyValueFactory<>("rate"));
         myOffersTable.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
-            if (newVal != null) {
-                loadRequestsForOffer(newVal.id);
+            if (newVal == null) {
+                return; // ✅ Avoid NullPointerException when selection is cleared
             }
+
+            loadRequestsForOffer(newVal.id);
         });
+
         myOfferStatusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
         myOffersTable.setRowFactory(tv -> new TableRow<>() {
             @Override
@@ -157,8 +161,11 @@ public class Offers implements Initializable {
             public void onResponse(Call<List<ExchangeOffer>> call, Response<List<ExchangeOffer>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     List<ExchangeOffer> all = response.body();
-                    int myId = Authentication.getInstance().getUserId(); // implement getUserId() if needed
-                    List<ExchangeOffer> mine = all.stream().filter(o -> o.userId != null && o.userId.equals(myId)).toList();
+                    int myId = Authentication.getInstance().getUserId();
+                    List<ExchangeOffer> mine = all.stream()
+                            .filter(o -> o.userId != null && o.userId.equals(myId))
+                            .toList();
+
                     javafx.application.Platform.runLater(() -> {
                         myOffersTable.getItems().setAll(mine);
                     });
@@ -172,13 +179,18 @@ public class Offers implements Initializable {
         });
     }
 
+
     private void loadRequestsForOffer(int offerId) {
         String token = Authentication.getInstance().getToken();
         ExchangeService.exchangeApi().getOfferRequests(offerId, "Bearer " + token).enqueue(new retrofit2.Callback<>() {
             @Override
             public void onResponse(Call<List<OfferRequest>> call, Response<List<OfferRequest>> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    List<OfferRequest> requests = response.body();
+                    List<OfferRequest> requests = response.body().stream()
+                            .filter(r -> r.status.equalsIgnoreCase("pending"))  // ✅ Only keep pending
+                            .toList();
+
+
 
                     // For each request, assign a name from the cache or placeholder
                     for (OfferRequest r : requests) {
@@ -235,21 +247,35 @@ public class Offers implements Initializable {
             public void onResponse(Call<Object> call, Response<Object> response) {
                 javafx.application.Platform.runLater(() -> {
                     if (response.isSuccessful()) {
-                        showAlert(Alert.AlertType.INFORMATION,
-                                approve ? "Request Approved" : "Request Rejected",
-                                approve ? "The request has been approved and balances updated."
-                                        : "The request has been rejected.");
-                        refreshMyOffers();
-                        ExchangeOffer selected = myOffersTable.getSelectionModel().getSelectedItem();
-                        if (selected != null) {
-                            loadRequestsForOffer(selected.id);
+
+                        if (approve) {
+                            requestsTable.getItems().clear();
+                            refreshMyOffers();
+                            myOffersTable.getSelectionModel().clearSelection();
+                        } else {
+                            requestsTable.getItems().removeIf(r -> r.id == requestId);
                         }
+
                     } else {
-                        showAlert(Alert.AlertType.ERROR, "Action Failed",
-                                "Failed to process request. It may be already handled.");
+                        String errorMsg = "Failed to process request.";
+                        try {
+                            if (response.errorBody() != null) {
+                                String backendMessage = response.errorBody().string();
+                                if (backendMessage.contains("insufficient")) {
+                                    // Strip JSON and show just the message
+                                    errorMsg = backendMessage.replace("{\"error\":\"", "").replace("\"}", "");
+                                }
+                            }
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+
+                        showAlert(Alert.AlertType.ERROR, "Action Failed", errorMsg);
                     }
                 });
             }
+
+
 
             @Override
             public void onFailure(Call<Object> call, Throwable t) {

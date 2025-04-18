@@ -68,10 +68,10 @@
                 <Label text="Requests for Selected Offer:" />
                 <TableView fx:id="requestsTable" VBox.vgrow="ALWAYS">
                     <columns>
-                        <TableColumn fx:id="requestIdColumn" text="Request ID" />
-                        <TableColumn fx:id="requestStatusColumn" text="Status" />
-                        <TableColumn fx:id="requestActionColumn" text="Action" />
-                        <TableColumn fx:id="requesterNameColumn" text="Requester" />
+                        <TableColumn fx:id="requestIdColumn" text="Request ID" prefWidth="100"/>
+                        <TableColumn fx:id="requestStatusColumn" text="Status" prefWidth="120"/>
+                        <TableColumn fx:id="requestActionColumn" text="Action" prefWidth="150"/>
+                        <TableColumn fx:id="requesterNameColumn" text="Requester" prefWidth="180"/>
 
                     </columns>
                 </TableView>

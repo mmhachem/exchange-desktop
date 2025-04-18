@@ -16,6 +16,19 @@ public class Authentication {
     private Authentication() {
         pref = Preferences.userRoot().node(this.getClass().getName());
         token = pref.get(TOKEN_KEY, null);
+
+        if (token != null) {
+            try {
+                String[] parts = token.split("\\.");
+                String payload = new String(Base64.getDecoder().decode(parts[1]));
+                JsonParser parser = new JsonParser();
+                JsonObject json = parser.parse(payload).getAsJsonObject();
+                userId = json.get("sub").getAsInt();  // ✅ auto-load userId
+            } catch (Exception e) {
+                System.err.println("Failed to decode token: " + e.getMessage());
+                userId = 0;
+            }
+        }
     }
 
     static public Authentication getInstance() {
@@ -45,4 +58,18 @@ public class Authentication {
     public int getUserId() {
         return userId;
     }
+    public void parseUserIdFromToken() {
+        if (token == null) return;
+        try {
+            String[] parts = token.split("\\.");
+            String payload = new String(Base64.getDecoder().decode(parts[1]));
+            JsonParser parser = new JsonParser();
+            JsonObject json = parser.parse(payload).getAsJsonObject();
+
+            userId = json.get("sub").getAsInt();
+        } catch (Exception e) {
+            System.err.println("Failed to parse user ID from token: " + e.getMessage());
+        }
+    }
+
 }
