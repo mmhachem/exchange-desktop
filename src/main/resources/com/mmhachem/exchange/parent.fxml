@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:id="borderPane"
+            fx:controller="com.mmhachem.exchange.Parent"
+            prefHeight="400.0" prefWidth="600.0"
+            stylesheets="@parent.css">
+    <left>
+        <VBox spacing="5" styleClass="nav-container" fillWidth="true">
+            <Button fx:id="ratesButton" styleClass="nav-button" text="Exchange Rate" onAction="#ratesSelected"/>
+            <Button fx:id="transactionButton" styleClass="nav-button" text="Transactions" onAction="#transactionsSelected"/>
+            <Button fx:id="loginButton" styleClass="nav-button" text="Login" onAction="#loginSelected"/>
+            <Button fx:id="registerButton" styleClass="nav-button" text="Register" onAction="#registerSelected"/>
+            <Button fx:id="logoutButton" styleClass="nav-button" text="Log out" onAction="#logoutSelected"/>
+
+
+        </VBox>
+    </left>
+    <center>
+        <fx:include source="rates/rates.fxml"/>
+    </center>
+</BorderPane>
+
