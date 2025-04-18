@@ -8,6 +8,7 @@ import com.mmhachem.exchange.PageCompleter;
 import com.mmhachem.exchange.OnPageCompleteListener;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
+import javafx.scene.control.Alert;
 import javafx.scene.control.TextField;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -15,7 +16,6 @@ import retrofit2.Response;
 import com.google.gson.JsonParser;
 
 import java.util.Base64;
-
 
 public class Login implements PageCompleter {
     public TextField usernameTextField;
@@ -33,7 +33,7 @@ public class Login implements PageCompleter {
         String password = passwordTextField.getText().trim();
 
         if (username.isEmpty() || password.isEmpty()) {
-            System.err.println("Username and password fields cannot be empty.");
+            showAlert(Alert.AlertType.ERROR, "Input Error", "Username and password fields cannot be empty.");
             return;
         }
 
@@ -45,34 +45,41 @@ public class Login implements PageCompleter {
                     String token = response.body().getToken();
                     Authentication.getInstance().saveToken(token);
 
-
                     try {
                         String[] parts = token.split("\\.");
                         String payload = new String(Base64.getDecoder().decode(parts[1]));
                         com.google.gson.JsonObject json = new JsonParser().parse(payload).getAsJsonObject();
 
                         int id = json.get("sub").getAsInt();
-                        Authentication.getInstance().saveUserId(id); // ✅ Save to Authentication
+                        Authentication.getInstance().saveUserId(id);
                     } catch (Exception e) {
-                        System.err.println("Failed to parse token: " + e.getMessage());
+                        showAlert(Alert.AlertType.WARNING, "Token Warning", "Token parsed but ID could not be extracted.");
                     }
 
                     Platform.runLater(() -> {
                         onPageCompleteListener.onPageCompleted();
                     });
                 } else {
-                    System.err.println("Login failed: Invalid credentials or server error.");
+                    showAlert(Alert.AlertType.ERROR, "Login Failed", "Invalid username or password.");
                 }
             }
 
             @Override
             public void onFailure(Call<Token> call, Throwable throwable) {
-                System.err.println("Login request failed: " + throwable.getMessage());
+                showAlert(Alert.AlertType.ERROR, "Connection Error", "Failed to connect: " + throwable.getMessage());
             }
         });
     }
 
+    private void showAlert(Alert.AlertType type, String title, String message) {
+        Platform.runLater(() -> {
+            Alert alert = new Alert(type);
+            alert.setTitle(title);
+            alert.setHeaderText(null);
+            alert.setContentText(message);
+            alert.showAndWait();
+        });
+    }
 }
-
 
 
