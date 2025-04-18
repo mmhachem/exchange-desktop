@@ -19,5 +19,14 @@ module com.mmhachem.exchange {
     opens com.mmhachem.exchange.login to javafx.fxml;
     exports com.mmhachem.exchange.register;
     opens com.mmhachem.exchange.register to javafx.fxml;
-}
 
+    // ✅ Added only what's missing below:
+    exports com.mmhachem.exchange.statistics;
+    opens com.mmhachem.exchange.statistics to javafx.fxml;
+
+    exports com.mmhachem.exchange.offers;
+    opens com.mmhachem.exchange.offers to javafx.fxml;
+
+    exports com.mmhachem.exchange.profile;
+    opens com.mmhachem.exchange.profile to javafx.fxml;
+}
