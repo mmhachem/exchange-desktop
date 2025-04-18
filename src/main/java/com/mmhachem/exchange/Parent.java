@@ -117,13 +117,12 @@ public class Parent implements Initializable, OnPageCompleteListener {
             return switch (this) {
                 case RATES -> "/com/mmhachem/exchange/rates/rates.fxml";
                 case TRANSACTIONS -> "/com/mmhachem/exchange/transactions/transactions.fxml";
-                case STATISTICS -> "/com/mmhachem/exchange/com.mmhachem.exchange.statistics/com.mmhachem.exchange.statistics.fxml";
-                case OFFERS -> "/com/mmhachem/exchange/com.mmhachem.exchange.offers/com.mmhachem.exchange.offers.fxml";
-                case PROFILE -> "/com/mmhachem/exchange/com.mmhachem.exchange.profile/com.mmhachem.exchange.profile.fxml";
+                case STATISTICS -> "/com/mmhachem/exchange/statistics/statistics.fxml";
+                case OFFERS -> "/com/mmhachem/exchange/offers/offers.fxml";
+                case PROFILE -> "/com/mmhachem/exchange/profile/profile.fxml";
                 case LOGIN -> "/com/mmhachem/exchange/login/login.fxml";
                 case REGISTER -> "/com/mmhachem/exchange/register/register.fxml";
 
-                default -> null;
             };
         }
 
