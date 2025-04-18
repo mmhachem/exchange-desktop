@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox spacing="10" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.mmhachem.exchange.offers.Offers">
+
+    <padding>
+        <Insets top="20" right="20" bottom="20" left="20"/>
+    </padding>
+
+    <TabPane VBox.vgrow="ALWAYS">
+        <Tab text="Available Offers">
+            <VBox spacing="10">
+                <TableView fx:id="offersTable" VBox.vgrow="ALWAYS">
+                    <columns>
+                        <TableColumn fx:id="idColumn" text="ID" />
+                        <TableColumn fx:id="typeColumn" text="Type" />
+                        <TableColumn fx:id="amountColumn" text="USD Amount" />
+                        <TableColumn fx:id="rateColumn" text="Rate" />
+                        <TableColumn fx:id="lbpEquivalentColumn" text="LBP Equivalent" />
+                        <TableColumn fx:id="actionColumn" text="Action" />
+                    </columns>
+                </TableView>
+                <Button text="Refresh" onAction="#refreshOffers" />
+            </VBox>
+        </Tab>
+        <Tab text="Create Offer">
+            <VBox spacing="15" alignment="CENTER">
+                <HBox spacing="10" alignment="CENTER">
+                    <RadioButton fx:id="buyRadio" text="I want to BUY USD" toggleGroup="$offerType" selected="true" />
+                    <RadioButton fx:id="sellRadio" text="I want to SELL USD" toggleGroup="$offerType" />
+                </HBox>
+
+                <HBox spacing="10" alignment="CENTER">
+                    <Label text="USD Amount:" />
+                    <TextField fx:id="usdAmountField" prefWidth="100" />
+                </HBox>
+
+                <HBox spacing="10" alignment="CENTER">
+                    <Label text="Exchange Rate (LBP per USD):" />
+                    <TextField fx:id="rateField" prefWidth="100" />
+                </HBox>
+
+                <HBox spacing="10" alignment="CENTER">
+                    <Label text="LBP Amount:" />
+                    <Label fx:id="lbpAmountLabel" text="0" />
+                </HBox>
+
+                <Button text="Create Offer" onAction="#createOffer" />
+                <Label fx:id="createOfferStatus" />
+            </VBox>
+        </Tab>
+        <Tab text="My Requests">
+            <VBox spacing="10">
+                <TableView fx:id="notificationsTable" VBox.vgrow="ALWAYS">
+                    <columns>
+                        <TableColumn fx:id="notifTypeColumn" text="Type" />
+                        <TableColumn fx:id="notifMessageColumn" text="Message" />
+                        <TableColumn fx:id="notifTimestampColumn" text="Time" />
+                    </columns>
+                </TableView>
+                <Button text="Refresh" onAction="#refreshNotifications" />
+            </VBox>
+        </Tab>
+    </TabPane>
+
+    <fx:define>
+        <ToggleGroup fx:id="offerType" />
+    </fx:define>
+
+</VBox>

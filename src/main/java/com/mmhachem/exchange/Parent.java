@@ -10,13 +10,16 @@ import java.net.URL;
 import java.util.ResourceBundle;
 
 public class Parent implements Initializable, OnPageCompleteListener {
-    public static Parent instance;   // ✅ To allow static access
+    public static Parent instance;
     public BorderPane borderPane;
     public Button transactionButton;
     public Button loginButton;
     public Button registerButton;
     public Button logoutButton;
     public Button ratesButton;
+    public Button statisticsButton;
+    public Button offersButton;
+    public Button profileButton;
 
 
     @Override
@@ -46,6 +49,18 @@ public class Parent implements Initializable, OnPageCompleteListener {
         swapContent(Section.RATES);
     }
 
+    public void statisticsSelected() {
+        swapContent(Section.STATISTICS);
+    }
+
+    public void offersSelected() {
+        swapContent(Section.OFFERS);
+    }
+
+    public void profileSelected() {
+        swapContent(Section.PROFILE);
+    }
+
     public void swapContent(Section section) {
         try {
             assert section.getResource() != null;
@@ -72,6 +87,12 @@ public class Parent implements Initializable, OnPageCompleteListener {
         registerButton.setVisible(!authenticated);
         logoutButton.setManaged(authenticated);
         logoutButton.setVisible(authenticated);
+        statisticsButton.setManaged(authenticated);
+        statisticsButton.setVisible(authenticated);
+        offersButton.setManaged(authenticated);
+        offersButton.setVisible(authenticated);
+        profileButton.setManaged(authenticated);
+        profileButton.setVisible(authenticated);
 
 
     }
@@ -86,6 +107,9 @@ public class Parent implements Initializable, OnPageCompleteListener {
     public static enum Section {
         RATES,
         TRANSACTIONS,
+        STATISTICS,
+        OFFERS,
+        PROFILE,
         LOGIN,
         REGISTER;
 
@@ -93,6 +117,9 @@ public class Parent implements Initializable, OnPageCompleteListener {
             return switch (this) {
                 case RATES -> "/com/mmhachem/exchange/rates/rates.fxml";
                 case TRANSACTIONS -> "/com/mmhachem/exchange/transactions/transactions.fxml";
+                case STATISTICS -> "/com/mmhachem/exchange/com.mmhachem.exchange.statistics/com.mmhachem.exchange.statistics.fxml";
+                case OFFERS -> "/com/mmhachem/exchange/com.mmhachem.exchange.offers/com.mmhachem.exchange.offers.fxml";
+                case PROFILE -> "/com/mmhachem/exchange/com.mmhachem.exchange.profile/com.mmhachem.exchange.profile.fxml";
                 case LOGIN -> "/com/mmhachem/exchange/login/login.fxml";
                 case REGISTER -> "/com/mmhachem/exchange/register/register.fxml";
 
