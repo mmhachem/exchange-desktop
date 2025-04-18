@@ -270,25 +270,29 @@ public class Offers implements Initializable {
         String token = Authentication.getInstance().getToken();
         if (token == null) return;
 
-        ExchangeService.exchangeApi().requestOffer(offerId, "Bearer " + token).enqueue(new retrofit2.Callback<OfferRequest>() {
-            @Override
-            public void onResponse(Call<OfferRequest> call, Response<OfferRequest> response) {
-                if (response.isSuccessful()) {
-                    javafx.application.Platform.runLater(() -> {
-                        createOfferStatus.setText("Offer requested successfully!");
-                    });
-                } else {
-                    javafx.application.Platform.runLater(() -> createOfferStatus.setText("Request failed."));
-                }
-            }
+        ExchangeService.exchangeApi().requestOffer(offerId, "Bearer " + token)
+                .enqueue(new retrofit2.Callback<>() {
+                    @Override
+                    public void onResponse(Call<OfferRequest> call, Response<OfferRequest> response) {
+                        javafx.application.Platform.runLater(() -> {
+                            if (response.isSuccessful()) {
+                                showAlert(Alert.AlertType.INFORMATION, "Request Sent", "Offer requested successfully!");
+                                refreshMyOffers(); // optional
+                            } else {
+                                showAlert(Alert.AlertType.ERROR, "Request Failed", "You already requested this offer or it's not available.");
+                            }
+                        });
+                    }
 
-            @Override
-            public void onFailure(Call<OfferRequest> call, Throwable t) {
-                System.err.println("Request failed: " + t.getMessage());
-                javafx.application.Platform.runLater(() -> createOfferStatus.setText("Error sending request."));
-            }
-        });
+                    @Override
+                    public void onFailure(Call<OfferRequest> call, Throwable t) {
+                        javafx.application.Platform.runLater(() ->
+                                showAlert(Alert.AlertType.ERROR, "Request Failed", "Error sending request: " + t.getMessage())
+                        );
+                    }
+                });
     }
+
 
     @FXML
     private void createOffer() {
@@ -322,6 +326,15 @@ public class Offers implements Initializable {
             createOfferStatus.setText("Invalid input.");
         }
     }
+
+    private void showAlert(Alert.AlertType type, String title, String message) {
+        Alert alert = new Alert(type);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+
 
 
 }
