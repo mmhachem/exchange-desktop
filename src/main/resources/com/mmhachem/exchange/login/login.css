@@ -1,3 +1,55 @@
-.title {
-    -fx-font-size: 20px;
+/* Login Page Styling */
+.root {
+    -fx-background-color: #FFFFFF;
+    -fx-font-family: "Roboto", sans-serif;
+}
+
+/* Header Styling */
+.header {
+    -fx-font-size: 26px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #1E1E2F;
+    -fx-padding: 20 0;
+    -fx-alignment: center;
+}
+
+/* Input Fields */
+.input-field {
+    -fx-background-color: #F4F4F9;
+    -fx-border-color: #6C63FF;
+    -fx-border-radius: 5px;
+    -fx-padding: 10 15;
+    -fx-font-size: 14px;
+    -fx-pref-width: 300px;
+}
+
+/* Buttons */
+.login-button {
+    -fx-background-color: #6C63FF;
+    -fx-text-fill: #FFFFFF;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 8;
+    -fx-padding: 10 20;
+    -fx-pref-width: 150px;
+}
+
+.login-button:hover {
+    -fx-background-color: #57577A;
+}
+
+.login-button:focused {
+    -fx-background-color: #3A3A55;
+}
+
+/* Links */
+.forgot-password {
+    -fx-font-size: 12px;
+    -fx-text-fill: #6C63FF;
+    -fx-underline: true;
+    -fx-cursor: hand;
+}
+
+.forgot-password:hover {
+    -fx-text-fill: #3A3A55;
 }

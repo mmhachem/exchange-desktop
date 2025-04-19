@@ -4,7 +4,8 @@
 
 <VBox spacing="10" xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
-      fx:controller="com.mmhachem.exchange.currencies.Currencies">
+      fx:controller="com.mmhachem.exchange.currencies.Currencies"
+      stylesheets="@currencies.css">
     <Label text="Available Currencies" styleClass="header-label"/>
     <TableView fx:id="currencyTable">
         <columns>

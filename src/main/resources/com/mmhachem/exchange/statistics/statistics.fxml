@@ -8,7 +8,8 @@
 <?import javafx.geometry.Insets?>
 
 <VBox spacing="10" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
-      fx:controller="com.mmhachem.exchange.statistics.Statistics">
+      fx:controller="com.mmhachem.exchange.statistics.Statistics"
+      stylesheets="@statistics.css">
 
     <padding>
         <Insets top="20" right="20" bottom="20" left="20"/>

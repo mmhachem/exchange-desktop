@@ -1,16 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.geometry.Insets?>
 
 <AnchorPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
-            fx:controller="com.mmhachem.exchange.transactions.Transactions"
-            prefHeight="400.0" prefWidth="600.0">
-    <TableView fx:id="tableView" AnchorPane.topAnchor="4" AnchorPane.bottomAnchor="4"
-               AnchorPane.leftAnchor="4" AnchorPane.rightAnchor="4">
-        <columns>
-            <TableColumn text="USD Amount" fx:id="usdAmount" prefWidth="150"/>
-            <TableColumn text="LBP Amount" fx:id="lbpAmount" prefWidth="150"/>
-            <TableColumn text="Transaction Date" fx:id="transactionDate" prefWidth="200"/>
-        </columns>
-    </TableView>
+            fx:controller="com.mmhachem.exchange.transactions.Transactions">
+    <ScrollPane fitToWidth="true" fitToHeight="true"
+                vbarPolicy="ALWAYS"
+                pannable="true"
+                AnchorPane.topAnchor="0.0"
+                AnchorPane.bottomAnchor="0.0"
+                AnchorPane.leftAnchor="0.0"
+                AnchorPane.rightAnchor="0.0"
+                stylesheets="@transactions.css">
+        <VBox fx:id="cardContainer" spacing="15" alignment="TOP_CENTER" styleClass="card-container">
+            <padding>
+                <Insets top="20" right="20" bottom="20" left="20"/>
+            </padding>
+        </VBox>
+    </ScrollPane>
 </AnchorPane>

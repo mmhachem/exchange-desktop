@@ -1,11 +1,11 @@
-/* Register Page Styling */
+/* Balance Page Styling */
 .root {
     -fx-background-color: #FFFFFF;
     -fx-font-family: "Roboto", sans-serif;
 }
 
-/* Title Styling */
-.title {
+/* Header Styling */
+.header {
     -fx-font-size: 26px;
     -fx-font-weight: bold;
     -fx-text-fill: #1E1E2F;
@@ -13,31 +13,33 @@
     -fx-alignment: center;
 }
 
-/* Input Fields */
-.text-field {
+/* Balance Display */
+.balance-display {
     -fx-background-color: #F4F4F9;
-    -fx-border-color: #6C63FF;
-    -fx-border-radius: 5px;
-    -fx-padding: 10 15;
-    -fx-font-size: 14px;
+    -fx-border-color: #3A3A55;
+    -fx-border-radius: 8;
+    -fx-padding: 15;
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #6C63FF;
+    -fx-alignment: center;
     -fx-pref-width: 300px;
 }
 
 /* Buttons */
-.button {
+.action-button {
     -fx-background-color: #6C63FF;
     -fx-text-fill: #FFFFFF;
     -fx-font-size: 14px;
     -fx-font-weight: bold;
     -fx-background-radius: 8;
     -fx-padding: 10 20;
-    -fx-pref-width: 150px;
 }
 
-.button:hover {
+.action-button:hover {
     -fx-background-color: #57577A;
 }
 
-.button:focused {
+.action-button:focused {
     -fx-background-color: #3A3A55;
 }

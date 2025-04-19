@@ -1,0 +1,21 @@
+.card-container {
+    -fx-padding: 20 20 100 20; /* top, right, bottom, left */
+    -fx-background-color: #F9F9F9;
+}
+
+.transaction-card {
+    -fx-background-color: white;
+    -fx-border-color: #ccc;
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
+    -fx-padding: 15;
+    -fx-spacing: 20;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.08), 5, 0, 0, 2);
+    -fx-min-width: 500;
+}
+
+.card-label {
+    -fx-font-size: 14px;
+    -fx-text-fill: #003049;
+    -fx-font-weight: bold;
+}

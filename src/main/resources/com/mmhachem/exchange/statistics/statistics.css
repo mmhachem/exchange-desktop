@@ -1,4 +1,4 @@
-/* Rates Page Styling */
+/* Statistics Page Styling */
 .root {
     -fx-background-color: #FFFFFF;
     -fx-font-family: "Roboto", sans-serif;
@@ -47,8 +47,31 @@
     -fx-background-color: #57577A;
 }
 
-/* Radio Buttons */
-.radio-button {
-    -fx-text-fill: #3A3A55;
+/* Charts */
+.chart {
+    -fx-background-color: #F4F4F9;
+    -fx-border-color: #3A3A55;
+    -fx-border-radius: 8;
+    -fx-padding: 15;
+}
+
+/* Table Styling */
+.table-view {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #3A3A55;
+    -fx-border-radius: 5px;
+    -fx-padding: 10;
+}
+
+.table-column-header {
+    -fx-background-color: #6C63FF;
+    -fx-text-fill: #FFFFFF;
     -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
+
+.table-cell {
+    -fx-font-size: 14px;
+    -fx-text-fill: #3A3A55;
+    -fx-padding: 8;
 }
