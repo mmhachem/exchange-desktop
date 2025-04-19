@@ -103,6 +103,8 @@ public interface Exchange {
     @GET("/predictRate")
     Call<RatePrediction> predictRate();
 
+    @POST("/chat")
+    Call<ChatResponse> chat(@Body ChatRequest request, @Header("Authorization") String token);
 
 
 

@@ -22,6 +22,8 @@ public class Parent implements Initializable, OnPageCompleteListener {
     public Button profileButton;
     public Button notificationsButton;
     public Button balanceButton;
+    public Button chatButton;
+
 
 
 
@@ -42,6 +44,10 @@ public class Parent implements Initializable, OnPageCompleteListener {
     public void loginSelected() {
         swapContent(Section.LOGIN);
     }
+    public void chatSelected() {
+        swapContent(Section.CHAT);
+    }
+
 
     public void registerSelected() {
         swapContent(Section.REGISTER);
@@ -108,6 +114,9 @@ public class Parent implements Initializable, OnPageCompleteListener {
         notificationsButton.setVisible(authenticated);
         balanceButton.setManaged(authenticated);
         balanceButton.setVisible(authenticated);
+        chatButton.setManaged(authenticated);
+        chatButton.setVisible(authenticated);
+
 
 
 
@@ -130,7 +139,8 @@ public class Parent implements Initializable, OnPageCompleteListener {
         LOGIN,
         REGISTER,
         NOTIFICATIONS,
-        BALANCE;
+        BALANCE,
+        CHAT;
 
         public String getResource() {
             return switch (this) {
@@ -143,6 +153,7 @@ public class Parent implements Initializable, OnPageCompleteListener {
                 case REGISTER -> "/com/mmhachem/exchange/register/register.fxml";
                 case NOTIFICATIONS -> "/com/mmhachem/exchange/notifications/notifications.fxml";
                 case BALANCE -> "/com/mmhachem/exchange/balance/balance.fxml";
+                case CHAT -> "/com/mmhachem/exchange/chat/chat.fxml";
 
 
             };
