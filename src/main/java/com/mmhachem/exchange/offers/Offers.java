@@ -71,6 +71,11 @@ public class Offers implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
+
+        ToggleGroup offerTypeGroup = new ToggleGroup();
+        buyRadio.setToggleGroup(offerTypeGroup);
+        sellRadio.setToggleGroup(offerTypeGroup);
+
         // Initialize table columns
         requesterNameColumn.setCellValueFactory(data ->
                 new SimpleStringProperty(data.getValue().requesterName));
@@ -452,6 +457,9 @@ public class Offers implements Initializable {
                                         javafx.application.Platform.runLater(() -> {
                                             if (offerResponse.isSuccessful()) {
                                                 createOfferStatus.setText("Offer created!");
+                                                javafx.animation.PauseTransition pause = new javafx.animation.PauseTransition(javafx.util.Duration.seconds(3));
+                                                pause.setOnFinished(ev -> createOfferStatus.setText(""));
+                                                pause.play();
                                                 refreshOffers();
                                                 refreshMyOffers();
                                             } else {
@@ -482,6 +490,9 @@ public class Offers implements Initializable {
 
         } catch (NumberFormatException e) {
             createOfferStatus.setText("Invalid input.");
+            javafx.animation.PauseTransition pause = new javafx.animation.PauseTransition(javafx.util.Duration.seconds(3));
+            pause.setOnFinished(ev -> createOfferStatus.setText(""));
+            pause.play();
         }
     }
 
