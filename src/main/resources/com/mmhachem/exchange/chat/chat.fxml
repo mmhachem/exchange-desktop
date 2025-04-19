@@ -8,7 +8,7 @@
             fx:controller="com.mmhachem.exchange.chat.Chat">
     <VBox spacing="10" AnchorPane.topAnchor="10" AnchorPane.bottomAnchor="10" AnchorPane.leftAnchor="10" AnchorPane.rightAnchor="10">
         <Label text="💬 Currency Exchange Chatbot" style="-fx-font-size: 18px; -fx-font-weight: bold;" />
-        <TextArea fx:id="chatArea" editable="false" wrapText="true" prefHeight="300"/>
+        <TextArea fx:id="chatArea" editable="false" wrapText="true" prefHeight="400" prefWidth="500"/>
         <HBox spacing="10">
             <TextField fx:id="inputField" HBox.hgrow="ALWAYS" promptText="Ask about exchange rates..."/>
             <Button text="Send" onAction="#sendMessage"/>

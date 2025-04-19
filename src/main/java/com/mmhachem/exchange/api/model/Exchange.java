@@ -106,6 +106,14 @@ public interface Exchange {
     @POST("/chat")
     Call<ChatResponse> chat(@Body ChatRequest request, @Header("Authorization") String token);
 
+    @GET("/currencies")
+    Call<List<Currency>> getCurrencies(@Header("Authorization") String token);
+
+    @POST("/exchange")
+    Call<ConversionResponse> convertCurrency(
+            @Body ConversionRequest request,
+            @Header("Authorization") String authorization
+    );
 
 
 

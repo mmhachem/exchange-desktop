@@ -424,6 +424,13 @@ public class Offers implements Initializable {
             String offerType = buyRadio.isSelected() ? "buy" : "sell";
             float usd = Float.parseFloat(usdAmountField.getText());
             float rate = Float.parseFloat(rateField.getText());
+            if (usd <= 0 || rate <= 0) {
+                createOfferStatus.setText(" Amount and rate must be positive.");
+                javafx.animation.PauseTransition pause = new javafx.animation.PauseTransition(javafx.util.Duration.seconds(3));
+                pause.setOnFinished(ev -> createOfferStatus.setText(""));
+                pause.play();
+                return;
+            }
             String token = Authentication.getInstance().getToken();
 
             // ✅ Step 1: Get user balance

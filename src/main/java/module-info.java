@@ -17,6 +17,15 @@ module com.mmhachem.exchange {
     exports com.mmhachem.exchange.chat to javafx.fxml;
     opens com.mmhachem.exchange.chat to javafx.fxml;
 
+
+    exports com.mmhachem.exchange.currencies;
+    opens com.mmhachem.exchange.currencies to javafx.fxml;
+
+    exports com.mmhachem.exchange.converter;
+    opens com.mmhachem.exchange.converter to javafx.fxml;
+
+
+
     exports com.mmhachem.exchange.balance;
     exports com.mmhachem.exchange;
     exports com.mmhachem.exchange.notifications;

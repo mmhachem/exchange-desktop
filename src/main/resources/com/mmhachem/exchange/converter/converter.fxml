@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.mmhachem.exchange.converter.Converter">
+
+    <center>
+        <VBox alignment="CENTER" spacing="20">
+            <Label text="Currency Converter">
+                <font>
+                    <Font size="22"/>
+                </font>
+            </Label>
+
+            <HBox alignment="CENTER" spacing="10">
+                <Label text="From:"/>
+                <ComboBox fx:id="fromCurrency" prefWidth="100"/>
+                <Label text="To:"/>
+                <ComboBox fx:id="toCurrency" prefWidth="100"/>
+            </HBox>
+
+            <HBox alignment="CENTER" spacing="10">
+                <Label text="Amount:"/>
+                <TextField fx:id="amountField" prefWidth="200"/>
+            </HBox>
+
+            <Button text="Convert" fx:id="convertButton" onAction="#handleConvert"/>
+
+            <HBox alignment="CENTER">
+                <Label fx:id="resultLabel" style="-fx-font-weight: bold;" wrapText="true" maxWidth="400"/>
+            </HBox>
+
+        </VBox>
+    </center>
+
+    <padding>
+        <Insets top="40" right="40" bottom="40" left="40"/>
+    </padding>
+</BorderPane>

@@ -32,15 +32,15 @@ public class Chat {
             public void onResponse(Call<ChatResponse> call, Response<ChatResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     String reply = response.body().response;
-                    Platform.runLater(() -> chatArea.appendText("Bot: " + reply + "\n"));
+                    Platform.runLater(() -> chatArea.appendText("ExchangeBot: " + reply + "\n"));
                 } else {
-                    Platform.runLater(() -> chatArea.appendText("⚠️ Bot: Failed to get a response.\n"));
+                    Platform.runLater(() -> chatArea.appendText("ExchangeBot: Failed to get a response.\n"));
                 }
             }
 
             @Override
             public void onFailure(Call<ChatResponse> call, Throwable t) {
-                Platform.runLater(() -> chatArea.appendText("❌ Error: " + t.getMessage() + "\n"));
+                Platform.runLater(() -> chatArea.appendText("Error: " + t.getMessage() + "\n"));
             }
         });
     }

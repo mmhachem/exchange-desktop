@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox spacing="10" xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.mmhachem.exchange.currencies.Currencies">
+    <Label text="Available Currencies" styleClass="header-label"/>
+    <TableView fx:id="currencyTable">
+        <columns>
+            <TableColumn fx:id="codeColumn" text="Code" />
+            <TableColumn fx:id="nameColumn" text="Name" />
+            <TableColumn fx:id="symbolColumn" text="Symbol" />
+            <TableColumn fx:id="rateColumn" text="Rate to USD" />
+        </columns>
+    </TableView>
+</VBox>

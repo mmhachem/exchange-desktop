@@ -23,6 +23,8 @@ public class Parent implements Initializable, OnPageCompleteListener {
     public Button notificationsButton;
     public Button balanceButton;
     public Button chatButton;
+    public Button currenciesButton;
+    public Button converterButton;
 
 
 
@@ -46,6 +48,10 @@ public class Parent implements Initializable, OnPageCompleteListener {
     }
     public void chatSelected() {
         swapContent(Section.CHAT);
+    }
+
+    public void converterSelected() {
+        swapContent(Section.CONVERTER);
     }
 
 
@@ -76,6 +82,11 @@ public class Parent implements Initializable, OnPageCompleteListener {
     public void balanceSelected() {
         swapContent(Section.BALANCE);
     }
+
+    public void currenciesSelected() {
+        swapContent(Section.CURRENCIES);
+    }
+
 
 
     public void swapContent(Section section) {
@@ -116,6 +127,12 @@ public class Parent implements Initializable, OnPageCompleteListener {
         balanceButton.setVisible(authenticated);
         chatButton.setManaged(authenticated);
         chatButton.setVisible(authenticated);
+        currenciesButton.setManaged(authenticated);
+        currenciesButton.setVisible(authenticated);
+        converterButton.setManaged(authenticated);
+        converterButton.setVisible(authenticated);
+
+
 
 
 
@@ -140,7 +157,9 @@ public class Parent implements Initializable, OnPageCompleteListener {
         REGISTER,
         NOTIFICATIONS,
         BALANCE,
-        CHAT;
+        CHAT,
+        CURRENCIES,
+        CONVERTER;
 
         public String getResource() {
             return switch (this) {
@@ -154,6 +173,8 @@ public class Parent implements Initializable, OnPageCompleteListener {
                 case NOTIFICATIONS -> "/com/mmhachem/exchange/notifications/notifications.fxml";
                 case BALANCE -> "/com/mmhachem/exchange/balance/balance.fxml";
                 case CHAT -> "/com/mmhachem/exchange/chat/chat.fxml";
+                case CURRENCIES -> "/com/mmhachem/exchange/currencies/currencies.fxml";
+                case CONVERTER -> "/com/mmhachem/exchange/converter/converter.fxml";
 
 
             };
