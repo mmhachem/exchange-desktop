@@ -20,12 +20,18 @@ import java.util.ResourceBundle;
 
 public class Profile implements Initializable {
 
-    @FXML private Label usernameLabel;
-    @FXML private Label usdLabel;
-    @FXML private Label lbpLabel;
-    @FXML private Label pointsLabel;
-    @FXML private Label levelLabel;
-    @FXML private ListView<String> badgesList;
+    @FXML
+    private Label usernameLabel;
+    @FXML
+    private Label usdLabel;
+    @FXML
+    private Label lbpLabel;
+    @FXML
+    private Label pointsLabel;
+    @FXML
+    private Label levelLabel;
+    @FXML
+    private ListView<String> badgesList;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -42,7 +48,6 @@ public class Profile implements Initializable {
             public void onResponse(Call<UserProfile> call, Response<UserProfile> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     UserProfile profile = response.body();
-                    System.out.println("RAW BADGES: " + profile.badges);
 
                     Platform.runLater(() -> {
                         usernameLabel.setText(profile.userName);
@@ -68,20 +73,17 @@ public class Profile implements Initializable {
                                 }
                             }
                         } else {
-                            // Simulate badges based on points
                             if (profile.points > 0) {
                                 badgesList.getItems().add("First Exchange");
                             }
                             if (profile.points >= 100) {
                                 badgesList.getItems().add("10 Deals Done");
                             }
-                            if (profile.points >= 20) {
-                                badgesList.getItems().add("Used Both USD & LBP");
-                            }
+
                         }
                     });
 
-                    // ✅ EXTRA CALL: Get approvals count from notifications
+
                     ExchangeService.exchangeApi().getNotifications("Bearer " + token).enqueue(new Callback<List<Notification>>() {
                         @Override
                         public void onResponse(Call<List<Notification>> call, Response<List<Notification>> notiResponse) {
@@ -92,10 +94,37 @@ public class Profile implements Initializable {
                                         .filter(n -> "offer_request".equals(n.type) && "approved".equals(n.status))
                                         .count();
 
-                                if (approvedCount >= 5) {
-                                    Platform.runLater(() ->
-                                            badgesList.getItems().add("5 Approvals Received"));
-                                }
+                                boolean didUSDToLBP = notifications.stream().anyMatch(n ->
+                                        "offer_request".equals(n.type) &&
+                                                "approved".equals(n.status) &&
+                                                n.message.contains("received ") &&
+                                                n.message.contains("USD") &&
+                                                n.message.contains("paid") &&
+                                                n.message.contains("LBP") &&
+                                                n.message.indexOf("USD") < n.message.indexOf("LBP")  // ✅ USD before LBP
+                                );
+
+
+                                boolean didLBPToUSD = notifications.stream().anyMatch(n ->
+                                        "offer_request".equals(n.type) &&
+                                                "approved".equals(n.status) &&
+                                                n.message.contains("received ") &&
+                                                n.message.contains("LBP") &&
+                                                n.message.contains("paid") &&
+                                                n.message.contains("USD") &&
+                                                n.message.indexOf("LBP") < n.message.indexOf("USD")  // ✅ LBP before USD
+                                );
+
+
+
+                                Platform.runLater(() -> {
+                                    if (approvedCount >= 5) {
+                                        badgesList.getItems().add("5 Approvals Received");
+                                    }
+                                    if (didUSDToLBP && didLBPToUSD) {
+                                        badgesList.getItems().add("Used Both USD & LBP");
+                                    }
+                                });
                             }
                         }
 
