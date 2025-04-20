@@ -4,85 +4,85 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.geometry.Insets?>
 
-<VBox spacing="10" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+<VBox spacing="20" xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
       fx:controller="com.mmhachem.exchange.offers.Offers"
       stylesheets="@offers.css">
 
     <padding>
-        <Insets top="20" right="20" bottom="20" left="20"/>
+        <Insets top="20" right="30" bottom="20" left="30"/>
     </padding>
 
     <TabPane VBox.vgrow="ALWAYS">
-        <Tab text="Available Offers">
-            <VBox spacing="10">
-                <TableView fx:id="offersTable" VBox.vgrow="ALWAYS">
-                    <columns>
-                        <TableColumn fx:id="idColumn" text="ID" />
-                        <TableColumn fx:id="typeColumn" text="Type" />
-                        <TableColumn fx:id="amountColumn" text="USD Amount" />
-                        <TableColumn fx:id="rateColumn" text="Rate" />
-                        <TableColumn fx:id="lbpEquivalentColumn" text="LBP Equivalent" />
-                        <TableColumn fx:id="actionColumn" text="Action" />
-                    </columns>
-                </TableView>
-                <Button text="Refresh" onAction="#refreshOffers" />
-            </VBox>
-        </Tab>
-        <Tab text="Create Offer">
-            <VBox spacing="15" alignment="CENTER">
-                <HBox spacing="10" alignment="CENTER">
-                    <RadioButton fx:id="buyRadio" text="I want to BUY USD" toggleGroup="$offerType" selected="true" />
-                    <RadioButton fx:id="sellRadio" text="I want to SELL USD" toggleGroup="$offerType" />
-                </HBox>
+        <!-- 🔹 AVAILABLE OFFERS -->
+        <Tab text="📄 Available Offers">
+            <VBox spacing="20" styleClass="card-section">
+                <Label text="Available Offers" styleClass="section-title"/>
 
-                <HBox spacing="10" alignment="CENTER">
-                    <Label text="USD Amount:" />
-                    <TextField fx:id="usdAmountField" prefWidth="100" />
-                </HBox>
+                <ScrollPane fitToWidth="true" fitToHeight="true" VBox.vgrow="ALWAYS" styleClass="scroll-pane">
+                    <content>
+                        <VBox fx:id="offersContainer" spacing="15"/>
+                    </content>
+                </ScrollPane>
 
-                <HBox spacing="10" alignment="CENTER">
-                    <Label text="Exchange Rate (LBP per USD):" />
-                    <TextField fx:id="rateField" prefWidth="100" />
-                </HBox>
-
-                <HBox spacing="10" alignment="CENTER">
-                    <Label text="LBP Amount:" />
-                    <Label fx:id="lbpAmountLabel" text="0" />
-                </HBox>
-
-                <Button text="Create Offer" onAction="#createOffer" />
-                <Label fx:id="createOfferStatus" />
-            </VBox>
-        </Tab>
-        <Tab text="My Offers">
-            <VBox spacing="10">
-                <TableView fx:id="myOffersTable" VBox.vgrow="ALWAYS">
-                    <columns>
-                        <TableColumn fx:id="myOfferIdColumn" text="ID" />
-                        <TableColumn fx:id="myOfferTypeColumn" text="Type" />
-                        <TableColumn fx:id="myOfferAmountColumn" text="USD" />
-                        <TableColumn fx:id="myOfferRateColumn" text="Rate" />
-                        <TableColumn fx:id="myOfferStatusColumn" text="Status" />
-
-                    </columns>
-                </TableView>
-                <Label text="Requests for Selected Offer:" />
-                <TableView fx:id="requestsTable" VBox.vgrow="ALWAYS">
-                    <columns>
-                        <TableColumn fx:id="requestIdColumn" text="Request ID" prefWidth="100"/>
-                        <TableColumn fx:id="requestStatusColumn" text="Status" prefWidth="120"/>
-                        <TableColumn fx:id="requestActionColumn" text="Action" prefWidth="150"/>
-                        <TableColumn fx:id="requesterNameColumn" text="Requester" prefWidth="180"/>
-
-                    </columns>
-                </TableView>
+                <Button text="🔄 Refresh" onAction="#refreshOffers" styleClass="refresh-button"/>
             </VBox>
         </Tab>
 
+        <!-- 🆕 CREATE OFFER -->
+        <Tab text="➕ Create Offer">
+            <VBox alignment="CENTER" spacing="30">
+                <VBox spacing="20" alignment="CENTER" styleClass="card-section" style="-fx-max-width: 520;">
+                    <Label text="Create a New Offer" styleClass="section-title"/>
+
+                    <HBox spacing="20" alignment="CENTER">
+                        <RadioButton fx:id="buyRadio" text="Buy USD 💰" toggleGroup="$offerType" selected="true" styleClass="radio-button"/>
+                        <RadioButton fx:id="sellRadio" text="Sell USD 💳" toggleGroup="$offerType" styleClass="radio-button"/>
+                    </HBox>
+
+                    <HBox spacing="10" alignment="CENTER">
+                        <Label text="USD Amount:"/>
+                        <TextField fx:id="usdAmountField" prefWidth="120" styleClass="input-field"/>
+                    </HBox>
+
+                    <HBox spacing="10" alignment="CENTER">
+                        <Label text="Rate (LBP per USD):"/>
+                        <TextField fx:id="rateField" prefWidth="120" styleClass="input-field"/>
+                    </HBox>
+
+                    <Label text="LBP Equivalent:"/>
+                    <Label fx:id="lbpAmountLabel" text="0" styleClass="value-label"/>
+
+                    <Button text="✔ Create Offer" onAction="#createOffer" styleClass="submit-button"/>
+                    <Label fx:id="createOfferStatus"/>
+                </VBox>
+            </VBox>
+        </Tab>
+
+        <!-- 📋 MY OFFERS -->
+        <Tab text="📋 My Offers">
+            <VBox spacing="20" styleClass="card-section">
+                <Label text="Your Offers" styleClass="section-title"/>
+
+                <ScrollPane fitToWidth="true" prefHeight="250" styleClass="scroll-pane">
+                    <content>
+                        <VBox fx:id="myOffersContainer" spacing="10"/>
+                    </content>
+                </ScrollPane>
+
+                <Label text="Requests for Selected Offer:" styleClass="section-title"/>
+
+                <ScrollPane fitToWidth="true" prefHeight="200" styleClass="scroll-pane">
+                    <content>
+                        <VBox fx:id="requestsContainer" spacing="10"/>
+                    </content>
+                </ScrollPane>
+            </VBox>
+        </Tab>
     </TabPane>
 
     <fx:define>
-        <ToggleGroup fx:id="offerType" />
+        <ToggleGroup fx:id="offerType"/>
     </fx:define>
 
 </VBox>

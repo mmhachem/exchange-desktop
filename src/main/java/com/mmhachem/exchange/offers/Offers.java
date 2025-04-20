@@ -2,162 +2,124 @@ package com.mmhachem.exchange.offers;
 
 import com.mmhachem.exchange.Authentication;
 import com.mmhachem.exchange.api.model.*;
+import javafx.animation.PauseTransition;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.Insets;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.util.Callback;
+import javafx.util.Duration;
 import retrofit2.Call;
 import retrofit2.Response;
 
 import java.io.IOException;
 import java.net.URL;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
-import java.util.ResourceBundle;
-import java.text.ParseException;
+import java.util.*;
 
 public class Offers implements Initializable {
-    @FXML
-    private TableView<ExchangeOffer> offersTable;
-    @FXML
-    private TableColumn<ExchangeOffer, Integer> idColumn;
-    @FXML
-    private TableColumn<ExchangeOffer, String> typeColumn;
-    @FXML
-    private TableColumn<ExchangeOffer, Float> amountColumn;
-    @FXML
-    private TableColumn<ExchangeOffer, Float> rateColumn;
-    @FXML
-    private TableColumn<ExchangeOffer, String> lbpEquivalentColumn;
-    @FXML
-    private TableColumn<ExchangeOffer, Void> actionColumn;
+    @FXML private VBox offersContainer;
+    @FXML private VBox requestsContainer;
+    @FXML private TableColumn<ExchangeOffer, String> typeColumn;
+    @FXML private TableColumn<ExchangeOffer, Float> amountColumn;
+    @FXML private TableColumn<ExchangeOffer, Float> rateColumn;
+    @FXML private TableColumn<ExchangeOffer, String> lbpEquivalentColumn;
+    @FXML private TableColumn<ExchangeOffer, Void> actionColumn;
 
+    @FXML private RadioButton buyRadio;
+    @FXML private RadioButton sellRadio;
+    @FXML private TextField usdAmountField;
+    @FXML private TextField rateField;
+    @FXML private Label lbpAmountLabel;
+    @FXML private Label createOfferStatus;
     @FXML
-    private RadioButton buyRadio;
-    @FXML
-    private RadioButton sellRadio;
-    @FXML
-    private TextField usdAmountField;
-    @FXML
-    private TextField rateField;
-    @FXML
-    private Label lbpAmountLabel;
-    @FXML
-    private Label createOfferStatus;
+    private VBox myOffersContainer;
+    private Optional<Integer> currentSelectedOfferId = Optional.empty();
 
 
-    @FXML private TableView<ExchangeOffer> myOffersTable;
-    @FXML private TableColumn<ExchangeOffer, Integer> myOfferIdColumn;
-    @FXML private TableColumn<ExchangeOffer, String> myOfferTypeColumn;
-    @FXML private TableColumn<ExchangeOffer, Float> myOfferAmountColumn;
-    @FXML private TableColumn<ExchangeOffer, Float> myOfferRateColumn;
-
-    @FXML private TableView<OfferRequest> requestsTable;
-    @FXML private TableColumn<OfferRequest, Integer> requestIdColumn;
-    @FXML private TableColumn<OfferRequest, String> requestStatusColumn;
-    @FXML private TableColumn<OfferRequest, Void> requestActionColumn;
-    @FXML private TableColumn<OfferRequest, String> requesterNameColumn;
-    @FXML private TableColumn<ExchangeOffer, String> myOfferStatusColumn;
-
-
-
-    private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
-    private final SimpleDateFormat readableFormat = new SimpleDateFormat("MMM dd, yyyy HH:mm");
+    private final Map<Integer, String> requesterCache = new HashMap<>();
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-
         ToggleGroup offerTypeGroup = new ToggleGroup();
         buyRadio.setToggleGroup(offerTypeGroup);
         sellRadio.setToggleGroup(offerTypeGroup);
 
-        // Initialize table columns
-        requesterNameColumn.setCellValueFactory(data ->
-                new SimpleStringProperty(data.getValue().requesterName));
+        ChangeListener<Object> updateLbp = (obs, oldVal, newVal) -> calculateLbpAmount();
+        usdAmountField.textProperty().addListener(updateLbp);
+        rateField.textProperty().addListener(updateLbp);
 
-        idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
-        typeColumn.setCellValueFactory(cellData ->
-                new SimpleStringProperty(cellData.getValue().offerType.equals("buy") ? "Buy USD" : "Sell USD"));
-        amountColumn.setCellValueFactory(new PropertyValueFactory<>("usdAmount"));
-        rateColumn.setCellValueFactory(new PropertyValueFactory<>("rate"));
-        lbpEquivalentColumn.setCellValueFactory(cellData -> {
-            ExchangeOffer offer = cellData.getValue();
-            return new SimpleStringProperty(String.format("%,.0f", offer.usdAmount * offer.rate));
-
-        });
-
-        // Setup action column
-        setupActionColumn();
-
-        // Setup com.mmhachem.exchange.notifications table
-
-
-        // Add listeners to calculate LBP amount
-        ChangeListener<Object> updateLbpAmount = (observable, oldValue, newValue) -> calculateLbpAmount();
-        usdAmountField.textProperty().addListener(updateLbpAmount);
-        rateField.textProperty().addListener(updateLbpAmount);
-
-        // Initial fetch
         refreshOffers();
         refreshMyOffers();
-
-
-
-        myOfferIdColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
-        myOfferTypeColumn.setCellValueFactory(cellData ->
-                new SimpleStringProperty(cellData.getValue().offerType.equals("buy") ? "Buy" : "Sell"));
-        myOfferAmountColumn.setCellValueFactory(new PropertyValueFactory<>("usdAmount"));
-        myOfferRateColumn.setCellValueFactory(new PropertyValueFactory<>("rate"));
-        myOffersTable.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
-            if (newVal == null) {
-                return; // ✅ Avoid NullPointerException when selection is cleared
-            }
-
-            loadRequestsForOffer(newVal.id);
-        });
-
-        myOfferStatusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
-        myOffersTable.setRowFactory(tv -> new TableRow<>() {
-            @Override
-            protected void updateItem(ExchangeOffer offer, boolean empty) {
-                super.updateItem(offer, empty);
-                if (offer == null || empty) {
-                    setStyle("");
-                } else if ("completed".equals(offer.status)) {
-                    setStyle("-fx-background-color: #e0e0e0;");
-                } else {
-                    setStyle(""); // Reset style for others
-                }
-            }
-        });
-
-
-
-
-        requestIdColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
-        requestStatusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
-        setupRequestActionColumn();
-
     }
 
     private void calculateLbpAmount() {
         try {
             float usd = Float.parseFloat(usdAmountField.getText());
             float rate = Float.parseFloat(rateField.getText());
-            float lbp = usd * rate;
-            lbpAmountLabel.setText(String.format("%,.0f", lbp));
+            lbpAmountLabel.setText(String.format("%,.0f", usd * rate));
         } catch (NumberFormatException e) {
             lbpAmountLabel.setText("0");
         }
     }
 
     @FXML
-    private void refreshMyOffers() {
+    private void refreshOffers() {
+        ExchangeService.exchangeApi().getOffers().enqueue(new retrofit2.Callback<>() {
+            @Override
+            public void onResponse(Call<List<ExchangeOffer>> call, Response<List<ExchangeOffer>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    List<ExchangeOffer> offers = response.body();
+                    javafx.application.Platform.runLater(() -> {
+                        offersContainer.getChildren().clear();
+                        for (ExchangeOffer offer : offers) {
+                            offersContainer.getChildren().add(createOfferCard(offer));
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<ExchangeOffer>> call, Throwable t) {
+                System.err.println("Failed to load offers: " + t.getMessage());
+            }
+        });
+    }
+
+    private VBox createOfferCard(ExchangeOffer offer) {
+        Label type = new Label((offer.offerType.equals("buy") ? "Buy USD 💰" : "Sell USD 💵"));
+        Label usd = new Label("USD: " + offer.usdAmount);
+        Label rate = new Label("Rate: " + offer.rate);
+        Label status = new Label("Status: " + offer.status);
+
+        VBox info = new VBox(5, type, usd, rate, status);
+        info.getStyleClass().add("offer-details");
+
+        HBox card = new HBox(20);
+        card.getStyleClass().add("offer-card");
+        card.setPadding(new Insets(10));
+
+        if (Authentication.getInstance().getUserId() == offer.userId) {
+            card.getChildren().add(info);
+            card.setOnMouseClicked(e -> loadRequestsForOffer(offer.id));
+        } else {
+            Button requestBtn = new Button("Request");
+            requestBtn.setOnAction(e -> sendRequest(offer.id));
+            card.getChildren().addAll(info, requestBtn);
+        }
+
+        VBox wrapper = new VBox(card);
+        wrapper.setPadding(new Insets(5));
+        wrapper.setStyle("-fx-background-color: #f9f9f9; -fx-border-color: #ccc; -fx-border-radius: 6;");
+
+        return wrapper;
+    }
+
+
+    private void sendRequest(int offerId) {
         String token = Authentication.getInstance().getToken();
         if (token == null) return;
 
@@ -165,78 +127,108 @@ public class Offers implements Initializable {
             @Override
             public void onResponse(Call<List<ExchangeOffer>> call, Response<List<ExchangeOffer>> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    List<ExchangeOffer> all = response.body();
-                    int myId = Authentication.getInstance().getUserId();
-                    List<ExchangeOffer> mine = all.stream()
-                            .filter(o -> o.userId != null && o.userId.equals(myId))
-                            .toList();
+                    ExchangeOffer selected = response.body().stream()
+                            .filter(o -> o.id == offerId)
+                            .findFirst().orElse(null);
 
-                    javafx.application.Platform.runLater(() -> {
-                        myOffersTable.getItems().setAll(mine);
+                    if (selected == null) {
+                        showAlert(Alert.AlertType.ERROR, "Error", "Offer not found.");
+                        return;
+                    }
+
+                    ExchangeService.exchangeApi().getBalance("Bearer " + token).enqueue(new retrofit2.Callback<>() {
+                        @Override
+                        public void onResponse(Call<UserBalance> call, Response<UserBalance> res) {
+                            if (res.isSuccessful() && res.body() != null) {
+                                UserBalance b = res.body();
+                                float usd = selected.usdAmount;
+                                float lbp = usd * selected.rate;
+
+                                boolean hasEnough = selected.offerType.equals("sell")
+                                        ? b.lbpBalance != null && b.lbpBalance >= lbp
+                                        : b.usdBalance != null && b.usdBalance >= usd;
+
+                                if (!hasEnough) {
+                                    javafx.application.Platform.runLater(() -> showAlert(Alert.AlertType.WARNING, "Insufficient Balance",
+                                            selected.offerType.equals("sell")
+                                                    ? "You need at least " + (int) lbp + " LBP to request this offer."
+                                                    : "You need at least " + usd + " USD to request this offer."));
+                                    return;
+                                }
+
+                                ExchangeService.exchangeApi().requestOffer(offerId, "Bearer " + token)
+                                        .enqueue(new retrofit2.Callback<>() {
+                                            @Override
+                                            public void onResponse(Call<OfferRequest> call, Response<OfferRequest> r) {
+                                                javafx.application.Platform.runLater(() -> {
+                                                    if (r.isSuccessful()) {
+                                                        showAlert(Alert.AlertType.INFORMATION, "Success", "Offer requested successfully!");
+                                                    } else {
+                                                        showAlert(Alert.AlertType.ERROR, "Failed", "You already requested this offer.");
+                                                    }
+                                                });
+                                            }
+
+                                            @Override
+                                            public void onFailure(Call<OfferRequest> call, Throwable t) {
+                                                javafx.application.Platform.runLater(() ->
+                                                        showAlert(Alert.AlertType.ERROR, "Failed", t.getMessage()));
+                                            }
+                                        });
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<UserBalance> call, Throwable t) {
+                            javafx.application.Platform.runLater(() ->
+                                    showAlert(Alert.AlertType.ERROR, "Error", "Failed to fetch balance."));
+                        }
                     });
                 }
             }
 
             @Override
             public void onFailure(Call<List<ExchangeOffer>> call, Throwable t) {
-                System.err.println("Failed to load my offers: " + t.getMessage());
+                System.err.println("Offer fetch failed: " + t.getMessage());
             }
         });
     }
-
 
     private void loadRequestsForOffer(int offerId) {
         String token = Authentication.getInstance().getToken();
         ExchangeService.exchangeApi().getOfferRequests(offerId, "Bearer " + token).enqueue(new retrofit2.Callback<>() {
             @Override
-            public void onResponse(Call<List<OfferRequest>> call, Response<List<OfferRequest>> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    List<OfferRequest> requests = response.body().stream()
-                            .filter(r -> r.status.equalsIgnoreCase("pending"))  // ✅ Only keep pending
-                            .toList();
+            public void onResponse(Call<List<OfferRequest>> call, Response<List<OfferRequest>> res) {
+                if (res.isSuccessful() && res.body() != null) {
+                    List<OfferRequest> requests = res.body().stream()
+                            .filter(r -> "pending".equalsIgnoreCase(r.status)).toList();
 
-
-
-                    // For each request, assign a name from the cache or placeholder
                     for (OfferRequest r : requests) {
-                        fetchRequesterName(r.requesterId, r);
+                        r.requesterName = requesterCache.computeIfAbsent(r.requesterId, id -> "User #" + id);
                     }
 
                     javafx.application.Platform.runLater(() -> {
-                        requestsTable.getItems().setAll(requests);
+                        requestsContainer.getChildren().clear();
+                        for (OfferRequest req : requests) {
+                            HBox row = new HBox(10);
+                            row.setPadding(new Insets(5));
+                            Label label = new Label(req.requesterName);
+                            Button accept = new Button("Accept");
+                            Button reject = new Button("Reject");
+
+                            accept.setOnAction(e -> handleRequestAction(req.id, true));
+                            reject.setOnAction(e -> handleRequestAction(req.id, false));
+
+                            row.getChildren().addAll(label, accept, reject);
+                            requestsContainer.getChildren().add(row);
+                        }
                     });
                 }
             }
 
-
             @Override
             public void onFailure(Call<List<OfferRequest>> call, Throwable t) {
                 System.err.println("Failed to load requests: " + t.getMessage());
-            }
-        });
-    }
-
-    private void setupRequestActionColumn() {
-        requestActionColumn.setCellFactory(param -> new TableCell<>() {
-            private final Button acceptBtn = new Button("Accept");
-            private final Button rejectBtn = new Button("Reject");
-            private final HBox box = new HBox(5, acceptBtn, rejectBtn);
-
-            {
-                acceptBtn.setOnAction(e -> {
-                    OfferRequest req = getTableView().getItems().get(getIndex());
-                    handleRequestAction(req.id, true);
-                });
-                rejectBtn.setOnAction(e -> {
-                    OfferRequest req = getTableView().getItems().get(getIndex());
-                    handleRequestAction(req.id, false);
-                });
-            }
-
-            @Override
-            protected void updateItem(Void item, boolean empty) {
-                super.updateItem(item, empty);
-                setGraphic(empty ? null : box);
             }
         });
     }
@@ -249,170 +241,39 @@ public class Offers implements Initializable {
 
         call.enqueue(new retrofit2.Callback<>() {
             @Override
-            public void onResponse(Call<Object> call, Response<Object> response) {
+            public void onResponse(Call<Object> call, Response<Object> res) {
                 javafx.application.Platform.runLater(() -> {
-                    if (response.isSuccessful()) {
-
+                    if (res.isSuccessful()) {
                         if (approve) {
-                            requestsTable.getItems().clear();
-                            refreshMyOffers();
-                            myOffersTable.getSelectionModel().clearSelection();
+                            refreshOffers(); // if approved, offers might change
+                            requestsContainer.getChildren().clear();
                         } else {
-                            requestsTable.getItems().removeIf(r -> r.id == requestId);
-                        }
 
-                    } else {
-                        String errorMsg = "Failed to process request.";
-                        try {
-                            if (response.errorBody() != null) {
-                                String backendMessage = response.errorBody().string();
-                                if (backendMessage.contains("insufficient")) {
-                                    // Strip JSON and show just the message
-                                    errorMsg = backendMessage.replace("{\"error\":\"", "").replace("\"}", "");
+                            requestsContainer.getChildren().removeIf(node -> {
+                                if (node instanceof HBox row) {
+                                    return row.getChildren().stream().anyMatch(child ->
+                                            child instanceof Label && ((Label) child).getText().contains("User #"));
                                 }
-                            }
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
+                                return false;
+                            });
 
-                        showAlert(Alert.AlertType.ERROR, "Action Failed", errorMsg);
+                            // 🔁 Reselect the offer to reload updated requests
+                            currentSelectedOfferId.ifPresent(this::loadRequestsForOffer);
+                        }
+                    } else {
+                        showAlert(Alert.AlertType.ERROR, "Error", "Failed to process request.");
                     }
                 });
             }
 
-
-
             @Override
             public void onFailure(Call<Object> call, Throwable t) {
                 javafx.application.Platform.runLater(() ->
-                        showAlert(Alert.AlertType.ERROR, "Network Error", "Could not reach the server."));
-            }
-        });
-    }
-
-
-
-
-
-    @FXML
-    private void refreshOffers() {
-        ExchangeService.exchangeApi().getOffers().enqueue(new retrofit2.Callback<List<ExchangeOffer>>() {
-            @Override
-            public void onResponse(Call<List<ExchangeOffer>> call, Response<List<ExchangeOffer>> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    List<ExchangeOffer> offers = response.body();
-                    javafx.application.Platform.runLater(() -> {
-                        offersTable.getItems().setAll(offers);
-                    });
-                }
+                        showAlert(Alert.AlertType.ERROR, "Error", "Request failed: " + t.getMessage()));
             }
 
-            @Override
-            public void onFailure(Call<List<ExchangeOffer>> call, Throwable t) {
-                System.err.println("Failed to load com.mmhachem.exchange.offers: " + t.getMessage());
-            }
-        });
-    }
-
-    private void setupActionColumn() {
-        actionColumn.setCellFactory(new Callback<>() {
-            @Override
-            public TableCell<ExchangeOffer, Void> call(final TableColumn<ExchangeOffer, Void> param) {
-                return new TableCell<>() {
-                    private final Button btn = new Button("Request");
-
-                    {
-                        btn.setOnAction(event -> {
-                            ExchangeOffer offer = getTableView().getItems().get(getIndex());
-                            sendRequest(offer.id);
-                        });
-                    }
-
-                    @Override
-                    protected void updateItem(Void item, boolean empty) {
-                        super.updateItem(item, empty);
-                        if (empty) {
-                            setGraphic(null);
-                        } else {
-                            setGraphic(btn);
-                        }
-                    }
-                };
-            }
-        });
-    }
-
-    private void sendRequest(int offerId) {
-        String token = Authentication.getInstance().getToken();
-        if (token == null) return;
-
-        // 🔁 First fetch the offer details to determine type and amount
-        ExchangeOffer selectedOffer = offersTable.getItems().stream()
-                .filter(o -> o.id == offerId)
-                .findFirst()
-                .orElse(null);
-
-        if (selectedOffer == null) {
-            showAlert(Alert.AlertType.ERROR, "Error", "Offer not found.");
-            return;
-        }
-
-        // 🔁 Now fetch balance
-        ExchangeService.exchangeApi().getBalance("Bearer " + token).enqueue(new retrofit2.Callback<>() {
-            @Override
-            public void onResponse(Call<UserBalance> call, Response<UserBalance> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    UserBalance balance = response.body();
-                    float usd = selectedOffer.usdAmount;
-                    float lbp = selectedOffer.usdAmount * selectedOffer.rate;
-
-                    boolean hasEnough = selectedOffer.offerType.equals("sell")
-                            ? balance.lbpBalance != null && balance.lbpBalance >= lbp
-                            : balance.usdBalance != null && balance.usdBalance >= usd;
-
-                    if (!hasEnough) {
-                        javafx.application.Platform.runLater(() ->
-                                showAlert(Alert.AlertType.WARNING, "Insufficient Balance",
-                                        selectedOffer.offerType.equals("sell")
-                                                ? "You need at least " + (int) lbp + " LBP to request this offer."
-                                                : "You need at least " + usd + " USD to request this offer.")
-                        );
-                        return;
-                    }
-
-                    // ✅ Now proceed to send the request
-                    ExchangeService.exchangeApi().requestOffer(offerId, "Bearer " + token)
-                            .enqueue(new retrofit2.Callback<>() {
-                                @Override
-                                public void onResponse(Call<OfferRequest> call, Response<OfferRequest> response) {
-                                    javafx.application.Platform.runLater(() -> {
-                                        if (response.isSuccessful()) {
-                                            showAlert(Alert.AlertType.INFORMATION, "Request Sent", "Offer requested successfully!");
-                                            refreshMyOffers(); // optional
-                                        } else {
-                                            showAlert(Alert.AlertType.ERROR, "Request Failed", "You already requested this offer or it's not available.");
-                                        }
-                                    });
-                                }
-
-                                @Override
-                                public void onFailure(Call<OfferRequest> call, Throwable t) {
-                                    javafx.application.Platform.runLater(() ->
-                                            showAlert(Alert.AlertType.ERROR, "Request Failed", "Error sending request: " + t.getMessage())
-                                    );
-                                }
-                            });
-
-                } else {
-                    showAlert(Alert.AlertType.ERROR, "Balance Fetch Error", "Could not fetch your balance.");
-                }
-            }
-
-            @Override
-            public void onFailure(Call<UserBalance> call, Throwable t) {
-                javafx.application.Platform.runLater(() ->
-                        showAlert(Alert.AlertType.ERROR, "Balance Error", "Failed to check balance: " + t.getMessage())
-                );
+            private void loadRequestsForOffer(int offerId) {
+                Offers.this.loadRequestsForOffer(offerId); // to call from nested class
             }
         });
     }
@@ -421,56 +282,43 @@ public class Offers implements Initializable {
     @FXML
     private void createOffer() {
         try {
-            String offerType = buyRadio.isSelected() ? "buy" : "sell";
+            String type = buyRadio.isSelected() ? "buy" : "sell";
             float usd = Float.parseFloat(usdAmountField.getText());
             float rate = Float.parseFloat(rateField.getText());
-            if (usd <= 0 || rate <= 0) {
-                createOfferStatus.setText(" Amount and rate must be positive.");
-                javafx.animation.PauseTransition pause = new javafx.animation.PauseTransition(javafx.util.Duration.seconds(3));
-                pause.setOnFinished(ev -> createOfferStatus.setText(""));
-                pause.play();
-                return;
-            }
-            String token = Authentication.getInstance().getToken();
+            if (usd <= 0 || rate <= 0) throw new NumberFormatException();
 
-            // ✅ Step 1: Get user balance
+            String token = Authentication.getInstance().getToken();
+            float lbpNeeded = usd * rate;
+
             ExchangeService.exchangeApi().getBalance("Bearer " + token).enqueue(new retrofit2.Callback<>() {
                 @Override
-                public void onResponse(Call<UserBalance> call, Response<UserBalance> response) {
-                    if (response.isSuccessful() && response.body() != null) {
-                        UserBalance balance = response.body();
-                        float requiredLBP = usd * rate;
+                public void onResponse(Call<UserBalance> call, Response<UserBalance> res) {
+                    if (res.isSuccessful() && res.body() != null) {
+                        UserBalance b = res.body();
+                        boolean enough = (type.equals("sell") && b.usdBalance >= usd)
+                                || (type.equals("buy") && b.lbpBalance >= lbpNeeded);
 
-                        // ✅ Step 2: Check if the user has enough balance
-                        boolean hasEnough = (offerType.equals("sell") && balance.usdBalance >= usd)
-                                || (offerType.equals("buy") && balance.lbpBalance >= requiredLBP);
-
-                        if (!hasEnough) {
-                            javafx.application.Platform.runLater(() -> {
-                                showAlert(Alert.AlertType.ERROR, "Insufficient Balance",
-                                        offerType.equals("sell")
-                                                ? "You don't have enough USD to create this offer."
-                                                : "You don't have enough LBP to create this offer.");
-                            });
+                        if (!enough) {
+                            javafx.application.Platform.runLater(() -> showAlert(Alert.AlertType.ERROR, "Insufficient",
+                                    type.equals("sell") ? "Not enough USD" : "Not enough LBP"));
                             return;
                         }
 
-                        // ✅ Step 3: Proceed with offer creation
-                        ExchangeOffer offer = new ExchangeOffer(offerType, usd, rate);
+                        ExchangeOffer offer = new ExchangeOffer(type, usd, rate);
                         ExchangeService.exchangeApi().createOffer(offer, "Bearer " + token)
                                 .enqueue(new retrofit2.Callback<>() {
                                     @Override
-                                    public void onResponse(Call<ExchangeOffer> call, Response<ExchangeOffer> offerResponse) {
+                                    public void onResponse(Call<ExchangeOffer> call, Response<ExchangeOffer> r) {
                                         javafx.application.Platform.runLater(() -> {
-                                            if (offerResponse.isSuccessful()) {
+                                            if (r.isSuccessful()) {
                                                 createOfferStatus.setText("Offer created!");
-                                                javafx.animation.PauseTransition pause = new javafx.animation.PauseTransition(javafx.util.Duration.seconds(3));
-                                                pause.setOnFinished(ev -> createOfferStatus.setText(""));
+                                                PauseTransition pause = new PauseTransition(Duration.seconds(3));
+                                                pause.setOnFinished(e -> createOfferStatus.setText(""));
                                                 pause.play();
                                                 refreshOffers();
                                                 refreshMyOffers();
                                             } else {
-                                                createOfferStatus.setText("Failed to create offer.");
+                                                createOfferStatus.setText("Creation failed.");
                                             }
                                         });
                                     }
@@ -481,59 +329,92 @@ public class Offers implements Initializable {
                                                 createOfferStatus.setText("Error: " + t.getMessage()));
                                     }
                                 });
-
-                    } else {
-                        javafx.application.Platform.runLater(() ->
-                                showAlert(Alert.AlertType.ERROR, "Error", "Failed to check your balance."));
                     }
                 }
 
                 @Override
                 public void onFailure(Call<UserBalance> call, Throwable t) {
                     javafx.application.Platform.runLater(() ->
-                            showAlert(Alert.AlertType.ERROR, "Network Error", "Could not fetch balance: " + t.getMessage()));
+                            showAlert(Alert.AlertType.ERROR, "Balance Error", t.getMessage()));
                 }
             });
-
         } catch (NumberFormatException e) {
             createOfferStatus.setText("Invalid input.");
-            javafx.animation.PauseTransition pause = new javafx.animation.PauseTransition(javafx.util.Duration.seconds(3));
-            pause.setOnFinished(ev -> createOfferStatus.setText(""));
+            PauseTransition pause = new PauseTransition(Duration.seconds(3));
+            pause.setOnFinished(ev-> createOfferStatus.setText(""));
             pause.play();
         }
     }
+    @FXML
+    private void refreshMyOffers() {
+        String token = Authentication.getInstance().getToken();
+        ExchangeService.exchangeApi().getOffers().enqueue(new retrofit2.Callback<>() {
+            @Override
+            public void onResponse(Call<List<ExchangeOffer>> call, Response<List<ExchangeOffer>> res) {
+                if (res.isSuccessful() && res.body() != null) {
+                    int uid = Authentication.getInstance().getUserId();
+                    List<ExchangeOffer> mine = res.body().stream()
+                            .filter(o -> uid == o.userId).toList();
+
+                    javafx.application.Platform.runLater(() -> {
+                        myOffersContainer.getChildren().clear();
+                        for (ExchangeOffer offer : mine) {
+                            myOffersContainer.getChildren().add(createMyOfferCard(offer));
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<ExchangeOffer>> call, Throwable t) {
+                System.err.println("Failed to load offers: " + t.getMessage());
+            }
+        });
+    }
+
+    private HBox createMyOfferCard(ExchangeOffer offer) {
+        Label type = new Label((offer.offerType.equals("buy") ? "Buy USD 💰" : "Sell USD 💳"));
+        Label usd = new Label("USD: " + offer.usdAmount);
+        Label rate = new Label("Rate: " + offer.rate);
+        Label status = new Label("Status: " + offer.status);
+
+        VBox info = new VBox(5, type, usd, rate, status);
+        info.setStyle("-fx-background-color: white; -fx-padding: 10; -fx-background-radius: 10;");
+
+        Button dummy = new Button(); // optional: to simulate symmetry like request button space
+        dummy.setVisible(false);
+
+        HBox card = new HBox(20, info, dummy);
+        card.getStyleClass().add("offer-card"); // 💎 Match style with available offers
+        card.setPadding(new Insets(10));
+
+        card.setOnMouseClicked(e -> {
+            clearSelections();
+            card.setStyle("-fx-border-color: #003049; -fx-border-radius: 10; -fx-background-color: white;");
+            currentSelectedOfferId = Optional.of(offer.id);
+            loadRequestsForOffer(offer.id);
+        });
+
+        return card;
+    }
+
+    private void clearSelections() {
+        for (javafx.scene.Node node : myOffersContainer.getChildren()) {
+            if (node instanceof HBox) {
+                node.setStyle("-fx-background-color: white; -fx-border-color: #ccc; -fx-border-radius: 10;");
+            }
+        }
+    }
 
 
 
 
-
-    private void showAlert(Alert.AlertType type, String title, String message) {
+    private void showAlert(Alert.AlertType type, String title, String msg) {
         Alert alert = new Alert(type);
         alert.setTitle(title);
         alert.setHeaderText(null);
-        alert.setContentText(message);
+        alert.setContentText(msg);
         alert.showAndWait();
     }
-
-    private final java.util.Map<Integer, String> requesterCache = new java.util.HashMap<>();
-
-    private void fetchRequesterName(int requesterId, OfferRequest request) {
-        // Check if we already fetched this user's name
-        if (requesterCache.containsKey(requesterId)) {
-            request.requesterName = requesterCache.get(requesterId);
-            requestsTable.refresh();
-            return;
-        }
-
-        // Since we cannot call the backend for another user's profile directly,
-        // we fallback to a placeholder name
-        String name = "User #" + requesterId;
-        requesterCache.put(requesterId, name);
-        request.requesterName = name;
-        requestsTable.refresh();
-    }
-
-
-
-
 }
+

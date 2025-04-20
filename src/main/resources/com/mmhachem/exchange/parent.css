@@ -1,5 +1,5 @@
 .root-layout {
-    -fx-background-color: #EEF3F8;
+    -fx-background-color: rgb(255, 255, 255);
 }
 
 .nav-container {
