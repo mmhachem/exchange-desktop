@@ -17,10 +17,14 @@ import java.util.stream.Collectors;
 
 public class Converter {
 
-    @FXML private ComboBox<String> fromCurrency;
-    @FXML private ComboBox<String> toCurrency;
-    @FXML private TextField amountField;
-    @FXML private Label resultLabel;
+    @FXML
+    private ComboBox<String> fromCurrency;
+    @FXML
+    private ComboBox<String> toCurrency;
+    @FXML
+    private TextField amountField;
+    @FXML
+    private Label resultLabel;
 
     @FXML
     public void initialize() {
@@ -61,6 +65,13 @@ public class Converter {
 
         try {
             double amount = Double.parseDouble(amountText);
+
+            // ❌ Reject negative numbers
+            if (amount < 0) {
+                resultLabel.setText(" Amount cannot be negative");
+                return;
+            }
+
             Exchange api = com.mmhachem.exchange.api.model.ExchangeService.exchangeApi();
             String token = "Bearer " + Authentication.getInstance().getToken();
 
@@ -91,4 +102,5 @@ public class Converter {
             resultLabel.setText(" Invalid amount format");
         }
     }
+
 }
