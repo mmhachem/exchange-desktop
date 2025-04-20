@@ -1,12 +1,17 @@
 package com.mmhachem.exchange.notifications;
 
-import com.mmhachem.exchange.api.model.Notification;
 import com.mmhachem.exchange.Authentication;
 import com.mmhachem.exchange.api.model.ExchangeService;
-import javafx.beans.property.SimpleStringProperty;
+import com.mmhachem.exchange.api.model.Notification;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.*;
+import javafx.scene.control.Label;
+import javafx.scene.layout.VBox;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Region;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextFlow;
 
 import java.net.URL;
 import java.text.ParseException;
@@ -15,27 +20,14 @@ import java.util.*;
 
 public class Notifications implements Initializable {
 
-    @FXML private TableView<Notification> notificationTable;
-    @FXML private TableColumn<Notification, String> typeColumn;
-    @FXML private TableColumn<Notification, String> messageColumn;
-    @FXML private TableColumn<Notification, String> timestampColumn;
+    @FXML
+    private VBox notificationsContainer;
 
     private final SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
     private final SimpleDateFormat displayFormat = new SimpleDateFormat("MMM dd, yyyy HH:mm");
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        typeColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().type));
-        messageColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().message));
-        timestampColumn.setCellValueFactory(cellData -> {
-            try {
-                Date date = inputFormat.parse(cellData.getValue().timestamp);
-                return new SimpleStringProperty(displayFormat.format(date));
-            } catch (ParseException e) {
-                return new SimpleStringProperty(cellData.getValue().timestamp);
-            }
-        });
-
         refreshNotifications();
     }
 
@@ -46,7 +38,13 @@ public class Notifications implements Initializable {
             @Override
             public void onResponse(retrofit2.Call<List<Notification>> call, retrofit2.Response<List<Notification>> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    javafx.application.Platform.runLater(() -> notificationTable.getItems().setAll(response.body()));
+                    List<Notification> notifications = response.body();
+                    Platform.runLater(() -> {
+                        notificationsContainer.getChildren().clear();
+                        for (Notification notification : notifications) {
+                            notificationsContainer.getChildren().add(createNotificationCard(notification));
+                        }
+                    });
                 }
             }
 
@@ -55,5 +53,30 @@ public class Notifications implements Initializable {
                 System.err.println("Failed to load notifications: " + t.getMessage());
             }
         });
+    }
+
+    private VBox createNotificationCard(Notification notification) {
+        VBox card = new VBox(5);
+        card.getStyleClass().add("notification-card");
+
+        Label typeLabel = new Label(notification.type.toUpperCase());
+        typeLabel.getStyleClass().add("notification-type");
+
+        Text messageText = new Text(notification.message);
+        messageText.wrappingWidthProperty().set(500);
+        TextFlow messageFlow = new TextFlow(messageText);
+        messageFlow.getStyleClass().add("notification-message");
+
+        Label timeLabel;
+        try {
+            Date date = inputFormat.parse(notification.timestamp);
+            timeLabel = new Label(displayFormat.format(date));
+        } catch (ParseException e) {
+            timeLabel = new Label(notification.timestamp);
+        }
+        timeLabel.getStyleClass().add("notification-time");
+
+        card.getChildren().addAll(typeLabel, messageFlow, timeLabel);
+        return card;
     }
 }

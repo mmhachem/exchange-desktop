@@ -1,53 +1,73 @@
-/* Notifications Page Styling */
-.root {
-    -fx-background-color: #FFFFFF;
-    -fx-font-family: "Roboto", sans-serif;
-}
-
-/* Header Styling */
-.header {
-    -fx-font-size: 26px;
+.notifications-title {
+    -fx-font-size: 22px;
     -fx-font-weight: bold;
-    -fx-text-fill: #1E1E2F;
-    -fx-padding: 20 0;
-    -fx-alignment: center;
+    -fx-text-fill: #003049;
 }
 
-/* Notification Cards */
+
+
+.notification-list {
+    -fx-padding: 10;
+}
+
 .notification-card {
-    -fx-background-color: #F4F4F9;
-    -fx-border-color: #3A3A55;
-    -fx-border-radius: 8;
-    -fx-padding: 15;
-    -fx-spacing: 10;
-    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.1), 10, 0, 0, 5);
+    -fx-background-color: #FFFFFF;
+    -fx-background-radius: 10;
+    -fx-border-color: #DCE3E9;
+    -fx-border-radius: 10;
+    -fx-padding: 12;
+    -fx-spacing: 6;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 5, 0, 0, 1);
 }
 
-.notification-title {
-    -fx-font-size: 18px;
+.notification-type {
     -fx-font-weight: bold;
-    -fx-text-fill: #1E1E2F;
+    -fx-text-fill: #669BBC;
 }
 
 .notification-message {
+    -fx-wrap-text: true;
     -fx-font-size: 14px;
-    -fx-text-fill: #3A3A55;
+    -fx-text-fill: #333333;
 }
 
-/* Buttons */
-.action-button {
-    -fx-background-color: #6C63FF;
-    -fx-text-fill: #FFFFFF;
-    -fx-font-size: 14px;
+.notification-timestamp {
+    -fx-font-size: 11px;
+    -fx-text-fill: #888;
+}
+
+.refresh-button {
+    -fx-background-color: #669BBC;
+    -fx-text-fill: white;
     -fx-font-weight: bold;
-    -fx-background-radius: 8;
-    -fx-padding: 10 20;
+    -fx-background-radius: 6;
+    -fx-padding: 8 14;
 }
 
-.action-button:hover {
-    -fx-background-color: #57577A;
+.refresh-button:hover {
+    -fx-background-color: #558AA3;
+}
+.notifications-scroll {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-fit-to-width: true;
 }
 
-.action-button:focused {
-    -fx-background-color: #3A3A55;
+/* Hide scroll bar background */
+.notifications-scroll .scroll-bar:vertical {
+    -fx-background-color: transparent;
+}
+.notifications-scroll .scroll-bar:horizontal {
+    -fx-background-color: transparent;
+}
+
+/* Customize scroll thumb */
+.notifications-scroll .scroll-bar .thumb {
+    -fx-background-color: #A9BFD1;
+    -fx-background-radius: 6;
+}
+
+.notifications-scroll .scroll-bar .increment-button,
+.notifications-scroll .scroll-bar .decrement-button {
+    -fx-background-color: transparent;
 }
