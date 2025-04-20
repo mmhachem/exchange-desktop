@@ -8,7 +8,10 @@ import com.mmhachem.exchange.api.model.UserProfile;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.*;
+import javafx.scene.control.Label;
+import javafx.scene.layout.FlowPane;
+import javafx.scene.control.Button;
+import javafx.scene.control.Tooltip;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -31,7 +34,7 @@ public class Profile implements Initializable {
     @FXML
     private Label levelLabel;
     @FXML
-    private ListView<String> badgesList;
+    private FlowPane badgesList;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -56,7 +59,7 @@ public class Profile implements Initializable {
                         pointsLabel.setText(String.valueOf(profile.points));
                         levelLabel.setText(profile.level);
 
-                        badgesList.getItems().clear();
+                        badgesList.getChildren().clear();
 
                         if (profile.badges != null && !profile.badges.isEmpty()) {
                             for (String badge : profile.badges) {
@@ -66,23 +69,21 @@ public class Profile implements Initializable {
                                             .replace("\"", "")
                                             .trim();
                                     for (String b : badge.split(",")) {
-                                        badgesList.getItems().add(b.trim());
+                                        addBadge(b.trim());
                                     }
                                 } else {
-                                    badgesList.getItems().add(badge);
+                                    addBadge(badge);
                                 }
                             }
                         } else {
                             if (profile.points > 0) {
-                                badgesList.getItems().add("First Exchange");
+                                addBadge("First Exchange");
                             }
                             if (profile.points >= 100) {
-                                badgesList.getItems().add("10 Deals Done");
+                                addBadge("10 Deals Done");
                             }
-
                         }
                     });
-
 
                     ExchangeService.exchangeApi().getNotifications("Bearer " + token).enqueue(new Callback<List<Notification>>() {
                         @Override
@@ -101,9 +102,8 @@ public class Profile implements Initializable {
                                                 n.message.contains("USD") &&
                                                 n.message.contains("paid") &&
                                                 n.message.contains("LBP") &&
-                                                n.message.indexOf("USD") < n.message.indexOf("LBP")  // ✅ USD before LBP
+                                                n.message.indexOf("USD") < n.message.indexOf("LBP")
                                 );
-
 
                                 boolean didLBPToUSD = notifications.stream().anyMatch(n ->
                                         "offer_request".equals(n.type) &&
@@ -112,17 +112,15 @@ public class Profile implements Initializable {
                                                 n.message.contains("LBP") &&
                                                 n.message.contains("paid") &&
                                                 n.message.contains("USD") &&
-                                                n.message.indexOf("LBP") < n.message.indexOf("USD")  // ✅ LBP before USD
+                                                n.message.indexOf("LBP") < n.message.indexOf("USD")
                                 );
-
-
 
                                 Platform.runLater(() -> {
                                     if (approvedCount >= 5) {
-                                        badgesList.getItems().add("5 Approvals Received");
+                                        addBadge("5 Approvals Received");
                                     }
                                     if (didUSDToLBP && didLBPToUSD) {
-                                        badgesList.getItems().add("Used Both USD & LBP");
+                                        addBadge("Used Both USD & LBP");
                                     }
                                 });
                             }
@@ -141,5 +139,12 @@ public class Profile implements Initializable {
                 System.err.println("Failed to load profile: " + throwable.getMessage());
             }
         });
+    }
+
+    private void addBadge(String text) {
+        Label badgeLabel = new Label(text);
+        badgeLabel.getStyleClass().add("badge");
+        badgeLabel.setTooltip(new Tooltip(text)); // Optional: tooltip for full text
+        badgesList.getChildren().add(badgeLabel);
     }
 }

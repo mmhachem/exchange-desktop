@@ -1,25 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
 
-<VBox spacing="15" alignment="CENTER" xmlns="http://javafx.com/javafx"
+<VBox alignment="CENTER" spacing="30"
+      xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
       fx:controller="com.mmhachem.exchange.balance.Balance"
-      stylesheets="@balance.css">
+      stylesheets="@balance.css"
+      styleClass="balance-container">
 
-    <Label text="Update Your Balance" style="-fx-font-size: 18px;" />
+    <!-- Card -->
+    <VBox spacing="20" styleClass="balance-card">
+        <Label text="💰 Update Your Balance" styleClass="balance-title"/>
 
-    <HBox spacing="10" alignment="CENTER">
-        <Label text="USD Balance:" />
-        <TextField fx:id="usdField" prefWidth="100"/>
-        <Button text="Submit USD" onAction="#submitUsdBalance"/>
-    </HBox>
+        <VBox spacing="10" alignment="CENTER">
+            <HBox spacing="10" alignment="CENTER">
+                <Label text="USD Balance:" styleClass="balance-label"/>
+                <TextField fx:id="usdField" prefWidth="120" styleClass="balance-input"/>
+                <Button text="Submit USD" onAction="#submitUsdBalance" styleClass="balance-button"/>
+            </HBox>
 
-    <HBox spacing="10" alignment="CENTER">
-        <Label text="LBP Balance:" />
-        <TextField fx:id="lbpField" prefWidth="100"/>
-        <Button text="Submit LBP" onAction="#submitLbpBalance"/>
-    </HBox>
+            <HBox spacing="10" alignment="CENTER">
+                <Label text="LBP Balance:" styleClass="balance-label"/>
+                <TextField fx:id="lbpField" prefWidth="120" styleClass="balance-input"/>
+                <Button text="Submit LBP" onAction="#submitLbpBalance" styleClass="balance-button"/>
+            </HBox>
+        </VBox>
 
-    <Label fx:id="statusLabel" style="-fx-text-fill: green;" />
+        <Label fx:id="statusLabel" styleClass="status-label"/>
+    </VBox>
 </VBox>

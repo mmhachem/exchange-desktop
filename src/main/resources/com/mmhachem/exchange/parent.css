@@ -40,8 +40,26 @@
 .logout-button {
     -fx-background-color: #C1121F;
     -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 6;
+    -fx-padding: 10 15;
+    -fx-cursor: hand;
+    -fx-border-color: transparent;
+    -fx-pref-width: 160;
+    -fx-alignment: CENTER_LEFT;
 }
 
 .logout-button:hover {
     -fx-background-color: #780000;
 }
+
+.sidebar-scroll {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.scroll-pane .viewport {
+    -fx-background-color: transparent;
+}
+

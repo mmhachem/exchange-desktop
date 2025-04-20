@@ -1,23 +1,34 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.*?>
-<?import javafx.scene.layout.FlowPane?>
-<FlowPane xmlns="http://javafx.com/javafx"
-          xmlns:fx="http://javafx.com/fxml"
-          fx:controller="com.mmhachem.exchange.register.Register"
-          stylesheets="@register.css"
-          prefHeight="400.0" prefWidth="600.0"
-          orientation="VERTICAL"
-          vgap="10"
-          alignment="CENTER">
+<?import javafx.scene.layout.*?>
 
-    <Label styleClass="title" text="Create New Account"/>
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.mmhachem.exchange.register.Register"
+      stylesheets="@register.css"
+      alignment="CENTER"
+      spacing="20"
+      prefWidth="600"
+      prefHeight="500"
+      styleClass="auth-container">
 
-    <Label text="Username"/>
-    <TextField fx:id="usernameTextField"/>
+    <!-- Branding -->
+    <VBox alignment="CENTER">
+        <Label text="LBP Exchange Tracker" styleClass="brand-title"/>
+        <Label text="Track, predict, and manage your currency exchange" styleClass="brand-subtitle"/>
+    </VBox>
 
-    <Label text="Password"/>
-    <TextField fx:id="passwordTextField"/>
+    <!-- White Card Container -->
+    <VBox alignment="CENTER_LEFT" spacing="12" styleClass="auth-card">
+        <Label text="Create New Account" styleClass="form-title"/>
 
-    <Button text="Create Account" onAction="#register"/>
-</FlowPane>
+        <Label text="Username"/>
+        <TextField fx:id="usernameTextField" styleClass="input-field"/>
+
+        <Label text="Password"/>
+        <PasswordField fx:id="passwordTextField" styleClass="input-field"/>
+
+        <Button text="Create Account" onAction="#register" styleClass="submit-button"/>
+    </VBox>
+</VBox>

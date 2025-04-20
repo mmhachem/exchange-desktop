@@ -1,45 +1,52 @@
-/* Balance Page Styling */
-.root {
-    -fx-background-color: #FFFFFF;
-    -fx-font-family: "Roboto", sans-serif;
+.balance-container {
+    -fx-background-color: #EEF3F8;
+    -fx-padding: 40;
+    -fx-font-family: "Segoe UI", sans-serif;
 }
 
-/* Header Styling */
-.header {
-    -fx-font-size: 26px;
+.balance-card {
+    -fx-background-color: #ffffff;
+    -fx-padding: 30;
+    -fx-spacing: 20;
+    -fx-background-radius: 12;
+    -fx-border-radius: 12;
+    -fx-border-color: #DDE2E6;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.06), 10, 0, 0, 2);
+}
+
+.balance-title {
+    -fx-font-size: 20px;
     -fx-font-weight: bold;
-    -fx-text-fill: #1E1E2F;
-    -fx-padding: 20 0;
-    -fx-alignment: center;
+    -fx-text-fill: #003049;
 }
 
-/* Balance Display */
-.balance-display {
-    -fx-background-color: #F4F4F9;
-    -fx-border-color: #3A3A55;
-    -fx-border-radius: 8;
-    -fx-padding: 15;
-    -fx-font-size: 18px;
-    -fx-font-weight: bold;
-    -fx-text-fill: #6C63FF;
-    -fx-alignment: center;
-    -fx-pref-width: 300px;
-}
-
-/* Buttons */
-.action-button {
-    -fx-background-color: #6C63FF;
-    -fx-text-fill: #FFFFFF;
+.balance-label {
     -fx-font-size: 14px;
+    -fx-text-fill: #003049;
+}
+
+.balance-input {
+    -fx-font-size: 13px;
+    -fx-background-radius: 6;
+    -fx-border-color: #ccc;
+    -fx-border-radius: 6;
+}
+
+.balance-button {
+    -fx-background-color: #669BBC;
+    -fx-text-fill: white;
     -fx-font-weight: bold;
-    -fx-background-radius: 8;
-    -fx-padding: 10 20;
+    -fx-background-radius: 6;
+    -fx-cursor: hand;
+    -fx-padding: 6 12;
 }
 
-.action-button:hover {
-    -fx-background-color: #57577A;
+.balance-button:hover {
+    -fx-background-color: #558AA3;
 }
 
-.action-button:focused {
-    -fx-background-color: #3A3A55;
+.status-label {
+    -fx-font-size: 13px;
+    -fx-text-fill: green;
+    -fx-padding: 5 0 0 0;
 }

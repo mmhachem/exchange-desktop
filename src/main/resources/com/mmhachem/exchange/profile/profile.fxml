@@ -7,34 +7,40 @@
 <VBox spacing="20" xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
       fx:controller="com.mmhachem.exchange.profile.Profile"
-      stylesheets="@profile.css">
+      stylesheets="@profile.css"
+      styleClass="profile-container">
 
     <padding>
-        <Insets top="20" right="20" bottom="20" left="20"/>
+        <Insets top="30" right="30" bottom="30" left="30"/>
     </padding>
 
-    <Label text="User Profile" style="-fx-font-size: 24px; -fx-font-weight: bold;" />
+    <!-- Title -->
+    <Label text="User Profile" styleClass="profile-title"/>
 
-    <GridPane hgap="10" vgap="10">
-        <Label text="Username:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
-        <Label fx:id="usernameLabel" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+    <!-- Card with user info -->
+    <VBox spacing="15" styleClass="profile-card">
+        <GridPane hgap="20" vgap="10">
+            <Label text="Username:" styleClass="label-title" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+            <Label fx:id="usernameLabel" styleClass="label-value" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
 
-        <Label text="USD Balance:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
-        <Label fx:id="usdLabel" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+            <Label text="USD Balance:" styleClass="label-title" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+            <Label fx:id="usdLabel" styleClass="label-value" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
 
-        <Label text="LBP Balance:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
-        <Label fx:id="lbpLabel" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+            <Label text="LBP Balance:" styleClass="label-title" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+            <Label fx:id="lbpLabel" styleClass="label-value" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
 
-        <Label text="Points:" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
-        <Label fx:id="pointsLabel" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+            <Label text="Points:" styleClass="label-title" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+            <Label fx:id="pointsLabel" styleClass="label-value" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
 
-        <Label text="Level:" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
-        <Label fx:id="levelLabel" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
-    </GridPane>
+            <Label text="Level:" styleClass="label-title" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+            <Label fx:id="levelLabel" styleClass="label-value" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+        </GridPane>
 
-    <Label text="Badges:" style="-fx-font-size: 16px;"/>
-    <ListView fx:id="badgesList" prefHeight="150"/>
 
-    <Button text="Refresh Profile" onAction="#refreshProfile"/>
+        <!-- Badges -->
+        <Label text="Badges:" styleClass="section-title"/>
+        <FlowPane fx:id="badgesList" hgap="10" vgap="10" styleClass="badges-pane"/>
+    </VBox>
 
+    <Button text="Refresh Profile" onAction="#refreshProfile" styleClass="refresh-button"/>
 </VBox>

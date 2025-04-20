@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
@@ -7,12 +6,23 @@
             xmlns:fx="http://javafx.com/fxml"
             fx:controller="com.mmhachem.exchange.chat.Chat"
             stylesheets="@chat.css">
+
     <VBox spacing="10" AnchorPane.topAnchor="10" AnchorPane.bottomAnchor="10" AnchorPane.leftAnchor="10" AnchorPane.rightAnchor="10">
-        <Label text="💬 Currency Exchange Chatbot" style="-fx-font-size: 18px; -fx-font-weight: bold;" />
-        <TextArea fx:id="chatArea" editable="false" wrapText="true" prefHeight="400" prefWidth="500"/>
+
+        <!-- Title -->
+        <Label text="💬 Currency Exchange Chatbot" styleClass="chat-title"/>
+
+        <!-- White bubble container with scrollable chat -->
+        <VBox spacing="5" styleClass="chat-container" VBox.vgrow="ALWAYS">
+            <ScrollPane fx:id="chatScroll" fitToWidth="true" styleClass="chat-scroll" VBox.vgrow="ALWAYS">
+                <VBox fx:id="chatBox" spacing="10" styleClass="chat-box"/>
+            </ScrollPane>
+        </VBox>
+
+        <!-- Input & Send fixed -->
         <HBox spacing="10">
             <TextField fx:id="inputField" HBox.hgrow="ALWAYS" promptText="Ask about exchange rates..."/>
-            <Button text="Send" onAction="#sendMessage"/>
+            <Button text="Send" onAction="#sendMessage" styleClass="send-button"/>
         </HBox>
     </VBox>
 </AnchorPane>
